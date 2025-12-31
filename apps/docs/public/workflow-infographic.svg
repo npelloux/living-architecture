@@ -22,8 +22,8 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:zoom="1.2354457"
-     inkscape:cx="263.87237"
-     inkscape:cy="65.158669"
+     inkscape:cx="344.81483"
+     inkscape:cy="150.95767"
      inkscape:window-width="1648"
      inkscape:window-height="912"
      inkscape:window-x="0"
@@ -812,11 +812,11 @@
        x="0"
        y="20"
        font-family="Rubik, sans-serif"
-       font-size="13"
+       font-size="13px"
        font-weight="500"
-       fill="#0F766E"
+       fill="#0f766e"
        text-anchor="middle"
-       id="text7">graph schema</text>
+       id="text7">schema graph</text>
   </g>
   <!-- Label 3: Visualize and explore the schema -->
   <g
@@ -843,10 +843,10 @@
        x="0"
        y="20"
        font-family="Rubik, sans-serif"
-       font-size="13"
+       font-size="13px"
        font-weight="500"
-       fill="#0E7490"
+       fill="#0e7490"
        text-anchor="middle"
-       id="text10">the schema</text>
+       id="text10">the graph</text>
   </g>
 </svg>
