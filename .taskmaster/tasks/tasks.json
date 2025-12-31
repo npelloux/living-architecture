@@ -69,6 +69,17 @@
         "dependencies": [],
         "priority": "low",
         "subtasks": []
+      },
+      {
+        "id": 67,
+        "title": "Fix nav bar and sidebar alignment issues on docs site",
+        "description": "Top nav border and sidebar border don't align; green artifacts visible at top corners",
+        "details": "## Deliverable: Fix visual alignment issues on docs site header/sidebar\n\n### Context\nOn the docs site (living-architecture.dev), there are visual alignment issues:\n1. The horizontal line under the top nav bar doesn't align with the top of the left sidebar border\n2. Small green artifacts/lines visible at the top corners of the page (accent color leaking)\n\nScreenshot provided by user shows the issue on `/get-started/` page.\n\n### Key Decisions\n- This is a VitePress theme customization issue\n- Fix should be in custom CSS overrides\n\n### Delivers\nClean, aligned borders with no color artifacts\n\n### Acceptance Criteria\n- Given docs site loaded, When viewing header area, Then nav bar bottom border aligns with sidebar top\n- Given docs site loaded, When viewing top corners, Then no green artifacts visible\n- Given different viewport widths, When resizing, Then alignment remains consistent\n\n### Dependencies\n- None\n\n### Related Code\n- `/apps/docs/.vitepress/theme/` — custom theme overrides\n- `/apps/docs/.vitepress/config.ts` — VitePress config\n\n### Verification\n1. Visual inspection on living-architecture.dev after deploy\n2. Test at multiple viewport widths",
+        "testStrategy": "",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "low",
+        "subtasks": []
       }
     ],
     "metadata": {
@@ -81,7 +92,7 @@
       ],
       "created": "2025-12-31T18:44:27.260Z",
       "description": "Tasks for master context",
-      "updated": "2025-12-31T20:14:34.619Z"
+      "updated": "2025-12-31T20:20:00.991Z"
     }
   }
 }

@@ -6,13 +6,13 @@ import { CodeLinkMenu } from '@/features/flows/components/CodeLinkMenu/CodeLinkM
 interface EntityAccordionProps {
   entity: DomainEntity
   defaultExpanded?: boolean | undefined
-  onViewOnGraph?: (entityName: string) => void
+  onViewOnGraph?: (nodeId: string) => void
 }
 
 interface EntityHeaderActionsProps {
   entity: DomainEntity
   isExpanded: boolean
-  onViewOnGraph: ((entityName: string) => void) | undefined
+  onViewOnGraph: ((nodeId: string) => void) | undefined
 }
 
 function EntityHeaderActions({ entity, isExpanded, onViewOnGraph }: EntityHeaderActionsProps): React.ReactElement {
@@ -25,14 +25,14 @@ function EntityHeaderActions({ entity, isExpanded, onViewOnGraph }: EntityHeader
           repository={entity.sourceLocation.repository}
         />
       )}
-      {onViewOnGraph !== undefined && (
+      {onViewOnGraph !== undefined && entity.operationDetails[0] !== undefined && (
         <button
           type="button"
           className="graph-link-btn-sm"
           title="View on Graph"
           onClick={(e) => {
             e.stopPropagation()
-            onViewOnGraph(entity.name)
+            onViewOnGraph(entity.operationDetails[0].id)
           }}
         >
           <i className="ph ph-graph" aria-hidden="true" />

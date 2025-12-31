@@ -135,7 +135,7 @@ describe('EntitiesPage', () => {
     expect(screen.getByText('Order')).toBeInTheDocument()
   })
 
-  it('navigates to full graph when view on graph button clicked', async () => {
+  it('navigates to full graph with node ID when view on graph button clicked', async () => {
     const user = userEvent.setup()
     const graph = createTestGraph()
 
@@ -148,7 +148,7 @@ describe('EntitiesPage', () => {
     const graphButton = screen.getByTitle('View on Graph')
     await user.click(graphButton)
 
-    expect(mockNavigate).toHaveBeenCalledWith('/full-graph?node=Order')
+    expect(mockNavigate).toHaveBeenCalledWith('/full-graph?node=n2')
   })
 
   it('resets to all domains filter after selecting a specific domain', async () => {

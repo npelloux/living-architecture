@@ -342,6 +342,74 @@ describe('GraphRenderingSetup', () => {
       expect(nodeSelection.attr('opacity')).toBe('1')
       cleanup()
     })
+
+    it('dims nodes outside highlighted flow when highlightedNodeIds contains a node ID', () => {
+      const { nodeGroup, linkGroup, cleanup } = createTestElements()
+
+      const nodeA: SimulationNode = { id: 'a', type: 'API', name: 'A', domain: 'test', originalNode: parseNode({ sourceLocation: testSourceLocation, id: 'a', type: 'API', name: 'A', domain: 'test', module: 'test' }) }
+      const nodeB: SimulationNode = { id: 'b', type: 'UseCase', name: 'B', domain: 'test', originalNode: parseNode({ sourceLocation: testSourceLocation, id: 'b', type: 'UseCase', name: 'B', domain: 'test', module: 'test' }) }
+      const nodeC: SimulationNode = { id: 'c', type: 'Event', name: 'C', domain: 'test', originalNode: parseNode({ sourceLocation: testSourceLocation, id: 'c', type: 'Event', name: 'C', domain: 'test', module: 'test', eventName: 'C' }) }
+      const nodeX: SimulationNode = { id: 'x', type: 'API', name: 'X', domain: 'other', originalNode: parseNode({ sourceLocation: testSourceLocation, id: 'x', type: 'API', name: 'X', domain: 'other', module: 'other' }) }
+
+      const nodeSelection = nodeGroup.selectAll<SVGGElement, SimulationNode>('g')
+        .data([nodeA, nodeB, nodeC, nodeX])
+        .join('g')
+
+      const emptyLinks: SimulationLink[] = []
+      const linkSelection = linkGroup.selectAll<SVGPathElement, SimulationLink>('path').data(emptyLinks).join('path')
+
+      const edges = [
+        parseEdge({ source: 'a', target: 'b', type: 'sync' }),
+        parseEdge({ source: 'b', target: 'c', type: 'sync' }),
+      ]
+
+      updateHighlight({
+        node: nodeSelection,
+        link: linkSelection,
+        filteredEdges: edges,
+        highlightedNodeIds: new Set(['b']),
+      })
+
+      const opacities = nodeSelection.nodes().map((n) => n.getAttribute('opacity'))
+      expect(opacities).toEqual(['1', '1', '1', '0.2'])
+      cleanup()
+    })
+
+    it('dims edges outside highlighted flow when highlightedNodeIds contains a node ID', () => {
+      const { nodeGroup, linkGroup, cleanup } = createTestElements()
+
+      const nodeA: SimulationNode = { id: 'a', type: 'API', name: 'A', domain: 'test', originalNode: parseNode({ sourceLocation: testSourceLocation, id: 'a', type: 'API', name: 'A', domain: 'test', module: 'test' }) }
+      const nodeB: SimulationNode = { id: 'b', type: 'UseCase', name: 'B', domain: 'test', originalNode: parseNode({ sourceLocation: testSourceLocation, id: 'b', type: 'UseCase', name: 'B', domain: 'test', module: 'test' }) }
+      const nodeX: SimulationNode = { id: 'x', type: 'API', name: 'X', domain: 'other', originalNode: parseNode({ sourceLocation: testSourceLocation, id: 'x', type: 'API', name: 'X', domain: 'other', module: 'other' }) }
+      const nodeY: SimulationNode = { id: 'y', type: 'API', name: 'Y', domain: 'other', originalNode: parseNode({ sourceLocation: testSourceLocation, id: 'y', type: 'API', name: 'Y', domain: 'other', module: 'other' }) }
+
+      const nodeSelection = nodeGroup.selectAll<SVGGElement, SimulationNode>('g')
+        .data([nodeA, nodeB, nodeX, nodeY])
+        .join('g')
+
+      const linkAB: SimulationLink = { source: 'a', target: 'b', type: 'sync', originalEdge: parseEdge({ source: 'a', target: 'b', type: 'sync' }) }
+      const linkXY: SimulationLink = { source: 'x', target: 'y', type: 'sync', originalEdge: parseEdge({ source: 'x', target: 'y', type: 'sync' }) }
+
+      const linkSelection = linkGroup.selectAll<SVGPathElement, SimulationLink>('path')
+        .data([linkAB, linkXY])
+        .join('path')
+
+      const edges = [
+        parseEdge({ source: 'a', target: 'b', type: 'sync' }),
+        parseEdge({ source: 'x', target: 'y', type: 'sync' }),
+      ]
+
+      updateHighlight({
+        node: nodeSelection,
+        link: linkSelection,
+        filteredEdges: edges,
+        highlightedNodeIds: new Set(['b']),
+      })
+
+      const opacities = linkSelection.nodes().map((n) => n.getAttribute('opacity'))
+      expect(opacities).toEqual(['0.8', '0.1'])
+      cleanup()
+    })
   })
 
 })

@@ -432,7 +432,9 @@ export function ForceGraph({
 
     applyVisualization(node, link, zoom, svg, nodes, focusedDomain, undefined, isGraphDataChange)
     svg.on('click', handleBackgroundClick)
-  }, [filteredNodes, filteredEdges, theme, dimensions, focusedDomain, applyVisualization, setupNodeEvents, handleBackgroundClick, handleNodeHover])
+
+    updateHighlight({ node, link, filteredEdges, highlightedNodeIds })
+  }, [filteredNodes, filteredEdges, theme, dimensions, focusedDomain, highlightedNodeIds, applyVisualization, setupNodeEvents, handleBackgroundClick, handleNodeHover])
 
   useEffect(() => {
     const node = nodeSelectionRef.current

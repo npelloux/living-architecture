@@ -334,10 +334,8 @@ describe('EntityAccordion', () => {
 
       render(<EntityAccordion entity={entity} defaultExpanded />)
 
-      // Expand the method card
       await user.click(screen.getByRole('button', { name: /begin/i }))
 
-      // Should show "Governed by" section within method card content
       const methodContent = screen.getByTestId('method-card-content')
       expect(methodContent).toHaveTextContent('Governed by')
       expect(methodContent).toHaveTextContent('Order must have at least one item')
@@ -390,10 +388,8 @@ describe('EntityAccordion', () => {
 
       render(<EntityAccordion entity={entity} defaultExpanded />)
 
-      // Should NOT contain raw comma between transitions
       const transition = screen.getByTestId('state-transition')
       expect(transition.textContent).not.toContain(', ')
-      // Should contain visual separator (pipe)
       expect(transition.textContent).toContain(' | ')
     })
 
@@ -437,7 +433,7 @@ describe('EntityAccordion', () => {
       expect(screen.getByTitle('View on Graph')).toBeInTheDocument()
     })
 
-    it('calls onViewOnGraph with entity name when graph button clicked', async () => {
+    it('calls onViewOnGraph with first operation node ID when graph button clicked', async () => {
       const user = userEvent.setup()
       const handleViewOnGraph = vi.fn()
 
@@ -445,7 +441,7 @@ describe('EntityAccordion', () => {
 
       await user.click(screen.getByTitle('View on Graph'))
 
-      expect(handleViewOnGraph).toHaveBeenCalledWith('Payment')
+      expect(handleViewOnGraph).toHaveBeenCalledWith('op-1')
     })
 
     it('does not expand accordion when graph button clicked', async () => {
