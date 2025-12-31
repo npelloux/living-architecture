@@ -291,7 +291,7 @@ describe('EventsPage', () => {
     expect(screen.getByText('PaymentCompleted')).toBeInTheDocument()
   })
 
-  it('extracts event schema from metadata', () => {
+  it('extracts event schema from eventSchema property', () => {
     const graph: RiviereGraph = {
       version: '1.0',
       metadata: { domains: parseDomainMetadata({ 'test-domain': { description: 'Test domain', systemType: 'domain' } }) },
@@ -303,12 +303,7 @@ describe('EventsPage', () => {
           domain: 'orders',
           module: 'checkout',
           eventName: 'OrderPlaced',
-          metadata: {
-            schema: {
-              orderId: 'string',
-              total: 'number',
-            },
-          },
+          eventSchema: '{ orderId: string, total: number }',
         }),
       ],
       links: [],

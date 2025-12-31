@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import type { DomainEvent } from '../../extractDomainDetails'
 import { CodeLinkMenu } from '@/features/flows/components/CodeLinkMenu/CodeLinkMenu'
 
@@ -92,7 +92,9 @@ export function EventAccordion({
                 <i className="ph ph-brackets-curly text-[var(--accent)]" aria-hidden="true" />
                 Schema
               </div>
-              <SchemaHighlight schema={event.schema} />
+              <pre className="overflow-x-auto whitespace-pre-wrap rounded-lg bg-[var(--bg-tertiary)] p-3 font-[var(--font-mono)] text-xs text-[var(--text-secondary)]">
+                {event.schema}
+              </pre>
             </div>
           )}
 
@@ -142,121 +144,4 @@ export function EventAccordion({
       )}
     </div>
   )
-}
-
-interface SchemaHighlightProps {
-  schema: string
-}
-
-function SchemaHighlight({ schema }: SchemaHighlightProps): React.ReactElement {
-  const formatted = useMemo(() => schema, [schema])
-  const tokens = useMemo(() => highlightTypeSchema(formatted), [formatted])
-
-  return (
-    <pre className="overflow-x-auto rounded-lg bg-[var(--bg-tertiary)] p-3 font-[var(--font-mono)] text-xs">
-      {tokens.map((token, i) => (
-        <span key={i} className={tokenColorClass(token.type)}>
-          {token.value}
-        </span>
-      ))}
-    </pre>
-  )
-}
-
-type TokenType = 'key' | 'string' | 'type' | 'punctuation' | 'plain'
-
-interface Token {
-  type: TokenType
-  value: string
-}
-
-function tokenColorClass(type: TokenType): string {
-  switch (type) {
-    case 'key':
-      return 'text-[var(--primary)]'
-    case 'string':
-      return 'text-[#10B981]'
-    case 'type':
-      return 'text-[#8B5CF6]'
-    case 'punctuation':
-      return 'text-[var(--text-tertiary)]'
-    case 'plain':
-    default:
-      return 'text-[var(--text-secondary)]'
-  }
-}
-
-const PRIMITIVE_TYPES = new Set(['string', 'number', 'boolean', 'null', 'undefined', 'timestamp'])
-
-function processKeyToken(match: RegExpExecArray, schema: string): Token[] {
-  const key = match[1]
-  if (key === undefined) return []
-  const tokens: Token[] = []
-  tokens.push({ type: 'key', value: key })
-  const colonStart = match.index + key.length
-  const colonEnd = match.index + match[0].length
-  tokens.push({ type: 'punctuation', value: schema.slice(colonStart, colonEnd) })
-  return tokens
-}
-
-function processStringToken(match: RegExpExecArray): Token[] {
-  if (match[2] === undefined && match[3] === undefined) {
-    throw new Error('String token regex failed: no match group captured')
-  }
-  const value = match[2] ?? match[3]
-  if (value === undefined) {
-    throw new Error('String token regex failed: both match groups are undefined')
-  }
-  return [{ type: 'string', value }]
-}
-
-function processIdentifierToken(match: RegExpExecArray): Token[] {
-  const identifier = match[4]
-  if (identifier === undefined) return []
-  const baseType = identifier.replace('[]', '')
-  const firstChar = baseType[0]
-  const isType = PRIMITIVE_TYPES.has(baseType) || (firstChar !== undefined && firstChar === firstChar.toUpperCase())
-  return [{ type: isType ? 'type' : 'plain', value: identifier }]
-}
-
-function processPunctuationToken(match: RegExpExecArray): Token[] {
-  const punctuation = match[5]
-  if (punctuation === undefined) return []
-  return [{ type: 'punctuation', value: punctuation }]
-}
-
-function processToken(match: RegExpExecArray, schema: string): Token[] {
-  if (match[1] !== undefined) return processKeyToken(match, schema)
-  if (match[2] !== undefined || match[3] !== undefined) return processStringToken(match)
-  if (match[4] !== undefined) return processIdentifierToken(match)
-  if (match[5] !== undefined) return processPunctuationToken(match)
-  return []
-}
-
-function appendRemainingText(tokens: Token[], schema: string, startIndex: number): void {
-  if (startIndex < schema.length) {
-    tokens.push({ type: 'plain', value: schema.slice(startIndex) })
-  }
-}
-
-function highlightTypeSchema(schema: string): Token[] {
-  const regex = /([a-zA-Z_][a-zA-Z0-9_]*)\s*:|('(?:[^'\\]|\\.)*')|("(?:[^"\\]|\\.)*")|([a-zA-Z_][a-zA-Z0-9_]*(?:\[\])?)|([{}[\]:,<>|&?])/g
-
-  function tokenizeMatches(tokens: Token[], lastIndex: number): Token[] {
-    const match = regex.exec(schema)
-
-    if (match === null) {
-      appendRemainingText(tokens, schema, lastIndex)
-      return tokens
-    }
-
-    if (match.index > lastIndex) {
-      tokens.push({ type: 'plain', value: schema.slice(lastIndex, match.index) })
-    }
-
-    tokens.push(...processToken(match, schema))
-    return tokenizeMatches(tokens, regex.lastIndex)
-  }
-
-  return tokenizeMatches([], 0)
 }

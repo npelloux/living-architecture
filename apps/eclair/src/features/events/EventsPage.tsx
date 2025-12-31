@@ -4,10 +4,6 @@ import type { RiviereGraph } from '@/types/riviere'
 import { EventAccordion } from '@/features/domains/components/EventAccordion/EventAccordion'
 import type { DomainEvent } from '@/features/domains/extractDomainDetails'
 
-function isValidSchemaObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-}
-
 interface EventsPageProps {
   graph: RiviereGraph
 }
@@ -52,13 +48,10 @@ export function EventsPage({ graph }: EventsPageProps): React.ReactElement {
           handlerName: h.name,
         }))
 
-      const schema = eventNode.metadata?.['schema']
-      const payloadSchema = isValidSchemaObject(schema) ? schema : undefined
-
       published.push({
         id: eventNode.id,
         eventName: eventNode.name,
-        schema: payloadSchema,
+        schema: eventNode.eventSchema,
         sourceLocation: eventNode.sourceLocation,
         handlers: eventHandlers,
         domain: eventNode.domain,

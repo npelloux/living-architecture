@@ -47,6 +47,17 @@
         "dependencies": [],
         "priority": "low",
         "subtasks": []
+      },
+      {
+        "id": 65,
+        "title": "Add event schema extraction to CLI and workflow",
+        "description": "Extract eventSchema from TypeScript event type definitions during extraction workflow",
+        "details": "## Deliverable: Event schemas extracted from code and displayed in Eclair\n\n### Context\nThe Riviere schema supports `eventSchema` on Event components, and Eclair displays it. However:\n1. The CLI has no way to add eventSchema when adding Event components\n2. The extraction workflow doesn't capture event schemas from TypeScript types\n3. The demo app has event types defined but they weren't being extracted\n\nReference graph now has eventSchema populated manually. Need to automate this.\n\nDemo app event example (orders-domain/src/infrastructure/events.ts):\n```typescript\nexport type OrderPlaced = {\n  type: 'OrderPlaced'\n  orderId: string\n  customerId: string\n  items: Array<{ sku: string; quantity: number }>\n  totalAmount: number\n  timestamp: string\n}\n```\n\n### Key Decisions and Principles\n- Add --event-schema flag to add-component for Event type\n- Update extraction workflow step-2 to capture event schemas from TypeScript types\n- Schema format: TypeScript type literal string (e.g., \"{ orderId: string, timestamp: string }\")\n\n### Delivers\n1. CLI supports adding eventSchema when creating Event components\n2. Extraction workflow captures event schemas from code\n3. Demo app extraction produces graphs with event schemas\n\n### Acceptance Criteria\n- Given Event type, When add-component called with --event-schema, Then eventSchema is set on component\n- Given TypeScript event type definition, When step-2 extraction runs, Then eventSchema captured\n- Given demo app, When full extraction runs, Then all 9 events have eventSchema populated\n- Given Eclair, When viewing Event component, Then schema is displayed\n\n### Dependencies\n- None\n\n### Related Code\n- `packages/riviere-cli/src/commands/builder/add-component.ts` — add --event-schema option\n- `packages/riviere-cli/docs/workflow/step-2-*.md` — update extraction instructions\n- `packages/riviere-schema/src/schema.ts:85` — EventComponent.eventSchema\n\n### Verification\n```bash\nnx test riviere-cli -- --testNamePattern \"add-component.*event.*schema\"\n```",
+        "testStrategy": "",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": []
       }
     ],
     "metadata": {
@@ -59,7 +70,7 @@
       ],
       "created": "2025-12-31T18:44:27.260Z",
       "description": "Tasks for master context",
-      "updated": "2025-12-31T18:52:40.185Z"
+      "updated": "2025-12-31T18:59:27.052Z"
     }
   }
 }

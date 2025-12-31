@@ -4,6 +4,14 @@ Defined in: [packages/riviere-builder/src/types.ts:178](https://github.com/NTCod
 
 ## Properties
 
+### behavior?
+
+> `optional` **behavior**: `OperationBehavior`
+
+Defined in: [packages/riviere-builder/src/types.ts:182](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/types.ts#L182)
+
+***
+
 ### businessRules?
 
 > `optional` **businessRules**: `string`[]

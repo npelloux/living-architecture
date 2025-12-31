@@ -189,6 +189,7 @@
       "domain": "orders",
       "module": "checkout",
       "eventName": "OrderPlaced",
+      "eventSchema": "{ orderId: string, customerId: string, items: OrderItem[], totalAmount: number, timestamp: string }",
       "sourceLocation": {
         "filePath": "orders-domain/src/infrastructure/events.ts",
         "lineNumber": 5,
@@ -274,6 +275,7 @@
       "domain": "inventory",
       "module": "fulfillment",
       "eventName": "InventoryReserved",
+      "eventSchema": "{ orderId: string, items: OrderItem[], timestamp: string }",
       "sourceLocation": {
         "filePath": "inventory-domain/src/infrastructure/events.ts",
         "lineNumber": 11,
@@ -348,6 +350,7 @@
       "domain": "payment",
       "module": "processing",
       "eventName": "PaymentCompleted",
+      "eventSchema": "{ orderId: string, paymentId: string, amount: number, timestamp: string }",
       "sourceLocation": {
         "filePath": "payment-domain/src/infrastructure/events.ts",
         "lineNumber": 5,
@@ -391,6 +394,7 @@
       "domain": "payment",
       "module": "processing",
       "eventName": "PaymentFailed",
+      "eventSchema": "{ orderId: string, paymentId: string, reason: string, timestamp: string }",
       "sourceLocation": {
         "filePath": "payment-domain/src/infrastructure/events.ts",
         "lineNumber": 11,
@@ -618,6 +622,7 @@
       "domain": "orders",
       "module": "checkout",
       "eventName": "OrderConfirmed",
+      "eventSchema": "{ orderId: string, timestamp: string }",
       "sourceLocation": {
         "filePath": "orders-domain/src/infrastructure/events.ts",
         "lineNumber": 12,
@@ -699,6 +704,7 @@
       "domain": "shipping",
       "module": "fulfillment",
       "eventName": "ShipmentCreated",
+      "eventSchema": "{ orderId: string, shipmentId: string, trackingNumber: string, timestamp: string }",
       "sourceLocation": {
         "filePath": "shipping-domain/src/infrastructure/events.ts",
         "lineNumber": 5,
@@ -844,6 +850,7 @@
       "domain": "shipping",
       "module": "fulfillment",
       "eventName": "ShipmentDispatched",
+      "eventSchema": "{ shipmentId: string, orderId: string, courierName: string, timestamp: string }",
       "sourceLocation": {
         "filePath": "shipping-domain/src/infrastructure/events.ts",
         "lineNumber": 11,
@@ -964,6 +971,7 @@
       "domain": "shipping",
       "module": "fulfillment",
       "eventName": "ShipmentDelivered",
+      "eventSchema": "{ orderId: string, shipmentId: string, timestamp: string }",
       "sourceLocation": {
         "filePath": "shipping-domain/src/infrastructure/events.ts",
         "lineNumber": 17,
@@ -1142,6 +1150,7 @@
       "domain": "orders",
       "module": "checkout",
       "eventName": "OrderCancelled",
+      "eventSchema": "{ orderId: string, reason: string, timestamp: string }",
       "sourceLocation": {
         "filePath": "orders-domain/src/infrastructure/events.ts",
         "lineNumber": 23,

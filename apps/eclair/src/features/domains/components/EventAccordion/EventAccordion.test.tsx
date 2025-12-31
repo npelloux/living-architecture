@@ -109,40 +109,7 @@ describe('EventAccordion', () => {
       expect(screen.getByText(/string/)).toBeInTheDocument()
     })
 
-    it('applies syntax highlighting to schema keys', async () => {
-      const user = userEvent.setup()
-      const event = createEvent({ schema: '{ orderId: string }' })
-
-      render(<EventAccordion event={event} />)
-      await user.click(screen.getByRole('button', { name: /orderplaced/i }))
-
-      const keyElement = screen.getByText(/orderId/)
-      expect(keyElement).toHaveClass('text-[var(--primary)]')
-    })
-
-    it('applies syntax highlighting to type keywords', async () => {
-      const user = userEvent.setup()
-      const event = createEvent({ schema: '{ orderId: string }' })
-
-      render(<EventAccordion event={event} />)
-      await user.click(screen.getByRole('button', { name: /orderplaced/i }))
-
-      const typeElements = screen.getAllByText(/string/)
-      expect(typeElements[0]).toHaveClass('text-[#8B5CF6]')
-    })
-
-    it('applies syntax highlighting to string literals', async () => {
-      const user = userEvent.setup()
-      const event = createEvent({ schema: '{ type: OrderCancelled }' })
-
-      render(<EventAccordion event={event} />)
-      await user.click(screen.getByRole('button', { name: /orderplaced/i }))
-
-      const stringElement = screen.getByText(/OrderCancelled/)
-      expect(stringElement).toHaveClass('text-[#8B5CF6]')
-    })
-
-    it('formats schema with each property on its own line', async () => {
+    it('displays schema text in pre element', async () => {
       const user = userEvent.setup()
       const event = createEvent({ schema: '{ type: OrderCancelled, orderId: string }' })
 
@@ -164,36 +131,6 @@ describe('EventAccordion', () => {
 
       expect(screen.getByText(/orderId/)).toBeInTheDocument()
       expect(screen.getByText(/Item\[\]/)).toBeInTheDocument()
-    })
-
-    it('handles schema with string type values correctly', async () => {
-      const user = userEvent.setup()
-      const event = createEvent({
-        schema: '{ count: number, active: boolean, created: timestamp }',
-      })
-
-      render(<EventAccordion event={event} />)
-      await user.click(screen.getByRole('button', { name: /orderplaced/i }))
-
-      const stringValues = screen.getAllByText(/number|boolean|timestamp/)
-      stringValues.forEach((el) => {
-        expect(el).toHaveClass('text-[#8B5CF6]')
-      })
-    })
-
-    it('handles schema with capitalized value names', async () => {
-      const user = userEvent.setup()
-      const event = createEvent({
-        schema: '{ order: OrderEntity, user: UserEntity }',
-      })
-
-      render(<EventAccordion event={event} />)
-      await user.click(screen.getByRole('button', { name: /orderplaced/i }))
-
-      const stringValues = screen.getAllByText(/OrderEntity|UserEntity/)
-      stringValues.forEach((el) => {
-        expect(el).toHaveClass('text-[#8B5CF6]')
-      })
     })
 
     it('shows schema when schema is empty object', async () => {
@@ -367,56 +304,20 @@ describe('EventAccordion', () => {
     })
   })
 
-  describe('schema highlighting edge cases', () => {
-    it('highlights punctuation characters', async () => {
-      const user = userEvent.setup()
-      const event = createEvent({ schema: '{ items: [] }' })
-
-      render(<EventAccordion event={event} />)
-      await user.click(screen.getByRole('button', { name: /orderplaced/i }))
-
-      const preElement = document.querySelector('pre')
-      expect(preElement).toBeInTheDocument()
-    })
-
-    it('highlights array types with brackets', async () => {
+  describe('schema display', () => {
+    it('displays schema with array types', async () => {
       const user = userEvent.setup()
       const event = createEvent({ schema: '{ tags: string[], counts: number[] }' })
 
       render(<EventAccordion event={event} />)
       await user.click(screen.getByRole('button', { name: /orderplaced/i }))
 
-      expect(screen.getByText(/string\[\]/)).toBeInTheDocument()
-      expect(screen.getByText(/number\[\]/)).toBeInTheDocument()
-    })
-
-    it('highlights primitive types', async () => {
-      const user = userEvent.setup()
-      const event = createEvent({
-        schema: '{ str: string, num: number, bool: boolean, nul: null, undef: undefined, time: timestamp }',
-      })
-
-      render(<EventAccordion event={event} />)
-      await user.click(screen.getByRole('button', { name: /orderplaced/i }))
-
       const preElement = document.querySelector('pre')
-      expect(preElement?.textContent).toContain('string')
-      expect(preElement?.textContent).toContain('number')
-      expect(preElement?.textContent).toContain('boolean')
+      expect(preElement?.textContent).toContain('string[]')
+      expect(preElement?.textContent).toContain('number[]')
     })
 
-    it('handles single-quoted strings in schema', async () => {
-      const user = userEvent.setup()
-      const event = createEvent({ schema: "{ status: 'active' }" })
-
-      render(<EventAccordion event={event} />)
-      await user.click(screen.getByRole('button', { name: /orderplaced/i }))
-
-      const preElement = document.querySelector('pre')
-      expect(preElement).toBeInTheDocument()
-    })
-
-    it('handles schemas with union types', async () => {
+    it('displays schema with union types', async () => {
       const user = userEvent.setup()
       const event = createEvent({ schema: '{ status: pending | active | completed }' })
 
@@ -425,17 +326,6 @@ describe('EventAccordion', () => {
 
       const preElement = document.querySelector('pre')
       expect(preElement?.textContent).toContain('pending | active | completed')
-    })
-
-    it('handles lowercase type names as plain text', async () => {
-      const user = userEvent.setup()
-      const event = createEvent({ schema: '{ data: customtype }' })
-
-      render(<EventAccordion event={event} />)
-      await user.click(screen.getByRole('button', { name: /orderplaced/i }))
-
-      const preElement = document.querySelector('pre')
-      expect(preElement).toBeInTheDocument()
     })
   })
 
