@@ -1,0 +1,25 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/riviere-query"
+    },
+    {
+      "path": "./packages/riviere-builder"
+    },
+    {
+      "path": "./packages/riviere-cli"
+    },
+    {
+      "path": "./apps/eclair"
+    },
+    {
+      "path": "./apps/docs"
+    },
+    {
+      "path": "./packages/riviere-schema"
+    }
+  ]
+}

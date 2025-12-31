@@ -1,0 +1,557 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://riviere.arch/schema/riviere.schema.json",
+  "title": "Rivière Architecture Graph",
+  "description": "Flow-based architecture graph format for operational visualization",
+  "type": "object",
+  "required": ["version", "metadata", "components", "links"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version",
+      "pattern": "^[0-9]+\\.[0-9]+$"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Graph-level metadata",
+      "required": ["domains"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable name for this architecture graph"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of what this graph represents"
+        },
+        "generated": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when this graph was generated"
+        },
+        "sources": {
+          "type": "array",
+          "description": "Source repositories this graph was extracted from",
+          "items": {
+            "type": "object",
+            "required": ["repository"],
+            "properties": {
+              "repository": {
+                "type": "string",
+                "description": "Repository name or identifier"
+              },
+              "commit": {
+                "type": "string",
+                "description": "Git commit SHA"
+              },
+              "extractedAt": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When this repository was extracted"
+              }
+            }
+          }
+        },
+        "domains": {
+          "type": "object",
+          "description": "Domain-level metadata keyed by domain name",
+          "minProperties": 1,
+          "additionalProperties": {
+            "$ref": "#/definitions/domainMetadata"
+          }
+        },
+        "customTypes": {
+          "type": "object",
+          "description": "User-defined custom component types with their required and optional properties",
+          "additionalProperties": {
+            "$ref": "#/definitions/customTypeDefinition"
+          }
+        }
+      }
+    },
+    "components": {
+      "type": "array",
+      "description": "Architectural components in the system",
+      "items": {
+        "$ref": "#/definitions/component"
+      }
+    },
+    "links": {
+      "type": "array",
+      "description": "Operational flows between components",
+      "items": {
+        "$ref": "#/definitions/link"
+      }
+    },
+    "externalLinks": {
+      "type": "array",
+      "description": "Links to external systems outside the graph",
+      "items": {
+        "$ref": "#/definitions/externalLink"
+      }
+    }
+  },
+  "definitions": {
+    "component": {
+      "oneOf": [
+        { "$ref": "#/definitions/uiComponent" },
+        { "$ref": "#/definitions/apiRestComponent" },
+        { "$ref": "#/definitions/apiGraphqlComponent" },
+        { "$ref": "#/definitions/apiOtherComponent" },
+        { "$ref": "#/definitions/useCaseComponent" },
+        { "$ref": "#/definitions/domainOpComponent" },
+        { "$ref": "#/definitions/eventComponent" },
+        { "$ref": "#/definitions/eventHandlerComponent" },
+        { "$ref": "#/definitions/customComponent" }
+      ]
+    },
+    "baseComponentProperties": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Globally unique identifier following format: {domain}:{module}:{type}:{name}[:{lineNumber}].",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable name",
+          "minLength": 1
+        },
+        "domain": {
+          "type": "string",
+          "description": "Domain boundary this node belongs to",
+          "minLength": 1
+        },
+        "module": {
+          "type": "string",
+          "description": "Functional module within the domain",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional description of what this node does"
+        },
+        "sourceLocation": {
+          "$ref": "#/definitions/sourceLocation"
+        }
+      }
+    },
+    "uiComponent": {
+      "type": "object",
+      "required": ["id", "type", "name", "domain", "module", "sourceLocation", "route"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "const": "UI" },
+        "name": { "type": "string", "minLength": 1 },
+        "domain": { "type": "string", "minLength": 1 },
+        "module": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "sourceLocation": { "$ref": "#/definitions/sourceLocation" },
+        "route": { "type": "string", "description": "URL route where UI component is rendered", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "apiRestComponent": {
+      "type": "object",
+      "required": ["id", "type", "name", "domain", "module", "sourceLocation", "apiType", "httpMethod", "path"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "const": "API" },
+        "name": { "type": "string", "minLength": 1 },
+        "domain": { "type": "string", "minLength": 1 },
+        "module": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "sourceLocation": { "$ref": "#/definitions/sourceLocation" },
+        "apiType": { "const": "REST" },
+        "httpMethod": { "type": "string", "enum": ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"] },
+        "path": { "type": "string", "description": "API path" }
+      },
+      "additionalProperties": false
+    },
+    "apiGraphqlComponent": {
+      "type": "object",
+      "required": ["id", "type", "name", "domain", "module", "sourceLocation", "apiType", "operationName"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "const": "API" },
+        "name": { "type": "string", "minLength": 1 },
+        "domain": { "type": "string", "minLength": 1 },
+        "module": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "sourceLocation": { "$ref": "#/definitions/sourceLocation" },
+        "apiType": { "const": "GraphQL" },
+        "operationName": { "type": "string", "description": "GraphQL operation name" }
+      },
+      "additionalProperties": false
+    },
+    "apiOtherComponent": {
+      "type": "object",
+      "required": ["id", "type", "name", "domain", "module", "sourceLocation", "apiType"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "const": "API" },
+        "name": { "type": "string", "minLength": 1 },
+        "domain": { "type": "string", "minLength": 1 },
+        "module": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "sourceLocation": { "$ref": "#/definitions/sourceLocation" },
+        "apiType": { "const": "other" }
+      },
+      "additionalProperties": false
+    },
+    "useCaseComponent": {
+      "type": "object",
+      "required": ["id", "type", "name", "domain", "module", "sourceLocation"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "const": "UseCase" },
+        "name": { "type": "string", "minLength": 1 },
+        "domain": { "type": "string", "minLength": 1 },
+        "module": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "sourceLocation": { "$ref": "#/definitions/sourceLocation" }
+      },
+      "additionalProperties": false
+    },
+    "domainOpComponent": {
+      "type": "object",
+      "required": ["id", "type", "name", "domain", "module", "sourceLocation", "operationName"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "const": "DomainOp" },
+        "name": { "type": "string", "minLength": 1 },
+        "domain": { "type": "string", "minLength": 1 },
+        "module": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "sourceLocation": { "$ref": "#/definitions/sourceLocation" },
+        "operationName": { "type": "string", "description": "Operation name" },
+        "entity": { "type": "string", "description": "Entity name" },
+        "signature": { "$ref": "#/definitions/operationSignature" },
+        "behavior": { "$ref": "#/definitions/operationBehavior" },
+        "stateChanges": { "type": "array", "items": { "$ref": "#/definitions/stateTransition" } },
+        "businessRules": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      },
+      "additionalProperties": false
+    },
+    "eventComponent": {
+      "type": "object",
+      "required": ["id", "type", "name", "domain", "module", "sourceLocation", "eventName"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "const": "Event" },
+        "name": { "type": "string", "minLength": 1 },
+        "domain": { "type": "string", "minLength": 1 },
+        "module": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "sourceLocation": { "$ref": "#/definitions/sourceLocation" },
+        "eventName": { "type": "string", "description": "Event name" },
+        "eventSchema": { "type": "string", "description": "Event schema definition" }
+      },
+      "additionalProperties": false
+    },
+    "eventHandlerComponent": {
+      "type": "object",
+      "required": ["id", "type", "name", "domain", "module", "sourceLocation", "subscribedEvents"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "const": "EventHandler" },
+        "name": { "type": "string", "minLength": 1 },
+        "domain": { "type": "string", "minLength": 1 },
+        "module": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "sourceLocation": { "$ref": "#/definitions/sourceLocation" },
+        "subscribedEvents": { "type": "array", "items": { "type": "string" }, "description": "Events this handler subscribes to" }
+      },
+      "additionalProperties": false
+    },
+    "customComponent": {
+      "type": "object",
+      "required": ["id", "type", "name", "domain", "module", "sourceLocation", "customTypeName"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "const": "Custom" },
+        "name": { "type": "string", "minLength": 1 },
+        "domain": { "type": "string", "minLength": 1 },
+        "module": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "sourceLocation": { "$ref": "#/definitions/sourceLocation" },
+        "customTypeName": { "type": "string", "description": "Name of the custom type (must match a key in metadata.customTypes)", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "link": {
+      "type": "object",
+      "required": ["source", "target"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Optional unique identifier for this link"
+        },
+        "source": {
+          "type": "string",
+          "description": "Source component ID",
+          "minLength": 1
+        },
+        "target": {
+          "type": "string",
+          "description": "Target component ID",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "enum": ["sync", "async"],
+          "description": "Link type: sync (request/response) or async (fire-and-forget, events)"
+        },
+        "payload": {
+          "type": "object",
+          "description": "Data transferred through this flow",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Payload type name"
+            },
+            "schema": {
+              "type": "object",
+              "description": "Schema definition as JSON object"
+            }
+          }
+        },
+        "sourceLocation": {
+          "$ref": "#/definitions/sourceLocation"
+        }
+      },
+      "additionalProperties": false
+    },
+    "externalLink": {
+      "type": "object",
+      "description": "Link from an internal component to an external system",
+      "required": ["source", "target"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Optional unique identifier for this link"
+        },
+        "source": {
+          "type": "string",
+          "description": "Source component ID (must exist in graph)",
+          "minLength": 1
+        },
+        "target": {
+          "$ref": "#/definitions/externalTarget",
+          "description": "External system being called"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["sync", "async"],
+          "description": "Link type: sync (request/response) or async (fire-and-forget)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of this integration"
+        },
+        "sourceLocation": {
+          "$ref": "#/definitions/sourceLocation"
+        }
+      },
+      "additionalProperties": false
+    },
+    "externalTarget": {
+      "type": "object",
+      "description": "Reference to an external system outside the graph",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the external system",
+          "minLength": 1
+        },
+        "domain": {
+          "type": "string",
+          "description": "Domain name if known"
+        },
+        "repository": {
+          "type": "string",
+          "description": "Repository name if known"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to the external system"
+        }
+      },
+      "additionalProperties": false
+    },
+    "sourceLocation": {
+      "type": "object",
+      "required": ["repository", "filePath"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "description": "Repository name or identifier"
+        },
+        "filePath": {
+          "type": "string",
+          "description": "Relative file path within repository",
+          "minLength": 1
+        },
+        "lineNumber": {
+          "type": "integer",
+          "description": "Starting line number",
+          "minimum": 1
+        },
+        "endLineNumber": {
+          "type": "integer",
+          "description": "Ending line number",
+          "minimum": 1
+        },
+        "methodName": {
+          "type": "string",
+          "description": "Method or function name"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Direct URL to view this location in source control"
+        }
+      },
+      "additionalProperties": false
+    },
+    "domainMetadata": {
+      "type": "object",
+      "description": "Domain-level metadata for UI display",
+      "required": ["description", "systemType"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of domain purpose"
+        },
+        "systemType": {
+          "type": "string",
+          "enum": ["domain", "bff", "ui", "other"],
+          "description": "Classification of domain's role in system"
+        }
+      },
+      "additionalProperties": false
+    },
+    "customTypeDefinition": {
+      "type": "object",
+      "description": "Definition of a custom component type with required and optional properties",
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of this custom type"
+        },
+        "requiredProperties": {
+          "type": "object",
+          "description": "Properties required for components of this custom type (beyond base component properties)",
+          "additionalProperties": {
+            "$ref": "#/definitions/customPropertyDefinition"
+          }
+        },
+        "optionalProperties": {
+          "type": "object",
+          "description": "Optional properties for components of this custom type",
+          "additionalProperties": {
+            "$ref": "#/definitions/customPropertyDefinition"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "customPropertyDefinition": {
+      "type": "object",
+      "description": "Definition of a property in a custom type",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "JSON Schema type (string, number, boolean, array, object)",
+          "enum": ["string", "number", "boolean", "array", "object"]
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of this property"
+        }
+      },
+      "additionalProperties": false
+    },
+    "operationSignature": {
+      "type": "object",
+      "description": "Method signature including parameters and return type",
+      "properties": {
+        "parameters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "type"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "type": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "returnType": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "operationBehavior": {
+      "type": "object",
+      "description": "Behavioral characteristics of the operation",
+      "properties": {
+        "reads": {
+          "type": "array",
+          "description": "Entity fields or state read by this operation",
+          "items": { "type": "string" }
+        },
+        "validates": {
+          "type": "array",
+          "description": "Invariants or preconditions validated",
+          "items": { "type": "string" }
+        },
+        "modifies": {
+          "type": "array",
+          "description": "Entity fields or state modified by this operation",
+          "items": { "type": "string" }
+        },
+        "emits": {
+          "type": "array",
+          "description": "Events emitted by this operation",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "stateTransition": {
+      "type": "object",
+      "description": "A single state transition caused by an operation",
+      "required": ["from", "to"],
+      "properties": {
+        "from": {
+          "type": "string",
+          "description": "Source state (use '*' for any state)",
+          "minLength": 1
+        },
+        "to": {
+          "type": "string",
+          "description": "Target state",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

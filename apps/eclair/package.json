@@ -1,0 +1,70 @@
+{
+  "name": "@living-architecture/eclair",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "nx": {
+    "targets": {
+      "build": {
+        "executor": "nx:run-commands",
+        "outputs": [
+          "{projectRoot}/dist"
+        ],
+        "options": {
+          "command": "vite build",
+          "cwd": "apps/eclair"
+        }
+      },
+      "serve": {
+        "executor": "nx:run-commands",
+        "continuous": true,
+        "options": {
+          "command": "vite",
+          "cwd": "apps/eclair"
+        }
+      },
+      "preview": {
+        "executor": "nx:run-commands",
+        "dependsOn": [
+          "build"
+        ],
+        "options": {
+          "command": "vite preview",
+          "cwd": "apps/eclair"
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "@living-architecture/riviere-query": "workspace:*",
+    "@living-architecture/riviere-schema": "workspace:*",
+    "@xyflow/react": "^12.9.3",
+    "d3": "^7.9.0",
+    "dagre": "^0.8.5",
+    "html-to-image": "^1.11.11",
+    "json5": "^2.2.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-json-view-lite": "^2.5.0",
+    "react-router-dom": "^7.9.6",
+    "zod": "^4.1.13",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.17",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/d3": "^7.4.3",
+    "@types/dagre": "^0.7.53",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "@vitest/ui": "^4.0.16",
+    "jsdom": "^26.0.0",
+    "tailwindcss": "^4.1.17",
+    "vite": "^7.2.4",
+    "vitest": "^4.0.16"
+  }
+}

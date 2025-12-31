@@ -1,0 +1,6 @@
+.vitepress/cache
+.vitepress/dist
+.vitepress/**/*.d.ts
+.vitepress/**/*.d.ts.map
+tsconfig.app.tsbuildinfo
+!.vitepress/theme/shims-vue.d.ts

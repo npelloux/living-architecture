@@ -1,0 +1,42 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 61,
+        "title": "Review and polish Eclair UI for launch",
+        "description": "Check for rough edges, verify interactions, ensure visual consistency",
+        "details": "## Deliverable: Eclair UI polished and launch-ready\n\n### Context\nPRD Phase 9 (docs/project/PRD/active/PRD-phase-9-launch.md), Milestone 7, Deliverables D7.1-D7.4.\n\nReview Eclair visualizer for any rough edges, broken interactions, or visual inconsistencies before launch.\n\n### Key Decisions and Principles\n- No obvious bugs or broken features\n- Follows brand guidelines\n- Works on common screen sizes\n\n### Delivers\nEclair ready for public use.\n\n### Acceptance Criteria\n- Given demo URL pre-fill When Load clicked Then demo loads correctly\n- Given visualization When viewed Then no layout issues or broken styling\n- Given browser console When app used Then no errors logged\n- Given domain filtering When used Then filters work correctly\n- Given node selection When clicked Then selection highlights correctly\n- Given zoom/pan When used Then navigation works smoothly\n- Given brand guidelines When compared Then colors and typography match\n- Given different screen sizes When tested Then layout adapts reasonably\n\n### Dependencies\n- Task 57 (demo URL pre-fill configured)\n\n### Related Code\n- apps/eclair/src/\n- docs/brand/ — brand guidelines for comparison\n\n### Verification\n- nx serve eclair\n- Test all interactions manually\n- Check browser console for errors\n- Compare against brand guidelines\n- Test on different viewport sizes",
+        "testStrategy": "",
+        "status": "pending",
+        "dependencies": [
+          "57"
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 62,
+        "title": "Refactor CI to tag-triggered npm publish",
+        "description": "Change release workflow so npm publish only happens after git push succeeds. Use tag-triggered workflow instead of publishing in the same job as version bump.",
+        "details": "",
+        "testStrategy": "",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "lastModified": "2025-12-30T22:30:41.937Z",
+      "taskCount": 61,
+      "completedCount": 56,
+      "tags": [
+        "master"
+      ],
+      "created": "2025-12-30T23:42:21.101Z",
+      "description": "Tasks for master context",
+      "updated": "2025-12-30T23:42:21.104Z"
+    }
+  }
+}
