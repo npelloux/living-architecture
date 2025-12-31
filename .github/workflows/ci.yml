@@ -79,12 +79,7 @@ jobs:
         run: git pull --rebase origin main
 
       - name: Release
-        run: |
-          if git describe --tags --abbrev=0 2>/dev/null; then
-            pnpm exec nx release --yes
-          else
-            pnpm exec nx release --yes --first-release
-          fi
+        run: pnpm exec nx release --yes
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
