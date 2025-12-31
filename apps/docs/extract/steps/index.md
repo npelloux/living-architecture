@@ -120,7 +120,7 @@ After completing all steps, your project will have:
 └── graph.json                   # The Rivière graph
 ```
 
-## If something goes wrong
+## Catching errors and improving the workflow
 
 If Claude misses components or makes mistakes:
 
@@ -130,3 +130,9 @@ If Claude misses components or makes mistakes:
    Fetch https://raw.githubusercontent.com/NTCoding/living-architecture/main/packages/riviere-cli/docs/workflow/step-3-extract.md and follow the instructions.
    You missed the API controllers in src/api/. Include those.
    ```
+
+**To improve future extractions:**
+
+- **Update configuration and rules** — Fix `.riviere/config/` files so the same problem doesn't happen next time
+- **Enforce codebase standards** — Add conventions for how components are implemented, reducing the need for complex extraction rules
+- **Build deterministic tools** — Create scripts that extract components reliably, then integrate them into the workflow
