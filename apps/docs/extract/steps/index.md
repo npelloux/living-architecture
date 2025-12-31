@@ -8,6 +8,8 @@ This is a default workflow using AI to analyze code and the CLI to build the gra
 
 Where possible, use deterministic tools for faster, repeatable, and more reliable results. Leverage AI where code analysis alone doesn't work. As a starting point, using AI is helpful until you build your own tools.
 
+Standardizing how architecture components are implemented in a codebase and enforcing those conventions is also highly recommended—this simplifies extraction and improves reliability.
+
 ## The 6 Steps Overview
 
 | Step | Purpose |
