@@ -41,7 +41,7 @@ export const NODE_COLORS: NodeColors = {
     Event: '#FBBF24',
     EventHandler: '#A78BFA',
     Custom: '#9CA3AF',
-    External: '#F97316',
+    External: '#64748B',
   },
   voltage: {
     UI: '#94A3B8',
@@ -51,7 +51,7 @@ export const NODE_COLORS: NodeColors = {
     Event: '#FBBF24',
     EventHandler: '#A78BFA',
     Custom: '#9CA3AF',
-    External: '#F97316',
+    External: '#64748B',
   },
   circuit: {
     UI: '#9CA3AF',
@@ -61,7 +61,7 @@ export const NODE_COLORS: NodeColors = {
     Event: '#D97706',
     EventHandler: '#6B7280',
     Custom: '#9CA3AF',
-    External: '#EA580C',
+    External: '#94A3B8',
   },
 }
 

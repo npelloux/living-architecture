@@ -30,6 +30,7 @@ import {
   createSimulationLinks,
   createExternalNodes,
   createExternalLinks,
+  createLayoutEdges,
   getNodeColor,
   getNodeRadius,
   getEdgeColor,
@@ -356,10 +357,7 @@ export function ForceGraph({
     lastGraphKeyRef.current = currentGraphKey
 
     const uniqueDomains = [...new Set(nodes.map((n) => n.domain))]
-    const edgesForLayout = filteredEdges.map((e) => ({
-      source: e.source,
-      target: e.target,
-    }))
+    const edgesForLayout = createLayoutEdges(filteredEdges, graph.externalLinks)
 
     const positions = computeDagreLayout({ nodes, edges: edgesForLayout })
     applyDagrePositions({ nodes, positions })

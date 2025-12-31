@@ -71,6 +71,11 @@ function extractNodeTypes(graph: RiviereGraph): NodeTypeInfo[] {
     typeCounts.set(node.type, count + 1)
   }
 
+  if (graph.externalLinks !== undefined && graph.externalLinks.length > 0) {
+    const uniqueExternals = new Set(graph.externalLinks.map((l) => l.target.name))
+    typeCounts.set('External', uniqueExternals.size)
+  }
+
   return Array.from(typeCounts.entries())
     .map(([type, nodeCount]) => ({ type, nodeCount }))
     .sort((a, b) => a.type.localeCompare(b.type))
@@ -88,9 +93,13 @@ export function FullGraphPage({ graph }: FullGraphPageProps): React.ReactElement
   )
   const [searchQuery, setSearchQuery] = useState('')
   const [filterPanelOpen, setFilterPanelOpen] = useState(false)
-  const [visibleTypes, setVisibleTypes] = useState<Set<NodeType>>(
-    () => new Set(graph.components.map((n) => n.type))
-  )
+  const [visibleTypes, setVisibleTypes] = useState<Set<NodeType>>(() => {
+    const types = new Set(graph.components.map((n) => n.type))
+    if (graph.externalLinks !== undefined && graph.externalLinks.length > 0) {
+      types.add('External')
+    }
+    return types
+  })
   const HIDE_ALL_DOMAINS = '__HIDE_ALL__'
   const [focusedDomain, setFocusedDomain] = useState<string | null>(null)
 
@@ -260,6 +269,7 @@ export function FullGraphPage({ graph }: FullGraphPageProps): React.ReactElement
         highlightedNodeIds={highlightedNodeIds}
         highlightedNodeId={highlightedNodeId}
         visibleNodeIds={visibleNodeIds}
+        visibleTypes={visibleTypes}
         focusedDomain={focusedDomain}
         onNodeClick={handleNodeClick}
         onNodeHover={handleNodeHover}

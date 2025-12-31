@@ -39,6 +39,24 @@ describe('graph constants', () => {
   })
 })
 
+describe('External node colors', () => {
+  test('uses gray color for External nodes in stream theme', () => {
+    expect(NODE_COLORS.stream.External).toBe('#64748B')
+  })
+
+  test('uses gray color for External nodes in voltage theme', () => {
+    expect(NODE_COLORS.voltage.External).toBe('#64748B')
+  })
+
+  test('uses light gray color for External nodes in circuit theme', () => {
+    expect(NODE_COLORS.circuit.External).toBe('#94A3B8')
+  })
+
+  test('External color is distinct from Event color', () => {
+    expect(NODE_COLORS.stream.External).not.toBe(NODE_COLORS.stream.Event)
+  })
+})
+
 describe('getDomainColor', () => {
   test('returns consistent color for same domain', () => {
     const domains = ['orders', 'shipping', 'inventory']

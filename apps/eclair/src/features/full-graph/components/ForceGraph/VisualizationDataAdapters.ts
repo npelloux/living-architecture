@@ -121,4 +121,30 @@ export function truncateName(name: string, maxLength: number): string {
   return name.substring(0, maxLength - 2) + '...'
 }
 
+interface LayoutEdge {
+  source: string
+  target: string
+}
+
+export function createLayoutEdges(
+  internalEdges: Edge[],
+  externalLinks: ExternalLink[] | undefined
+): LayoutEdge[] {
+  const layoutEdges: LayoutEdge[] = internalEdges.map((e) => ({
+    source: e.source,
+    target: e.target,
+  }))
+
+  if (externalLinks !== undefined) {
+    for (const link of externalLinks) {
+      layoutEdges.push({
+        source: link.source,
+        target: createExternalNodeId(link.target.name),
+      })
+    }
+  }
+
+  return layoutEdges
+}
+
 export { getDomainColor }

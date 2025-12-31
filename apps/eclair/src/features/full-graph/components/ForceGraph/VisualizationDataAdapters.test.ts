@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { createSimulationNodes, createSimulationLinks, createExternalNodes, createExternalLinks, isAsyncEdge, truncateName, getNodeColor, getNodeRadius, getEdgeColor, getDomainColor } from './VisualizationDataAdapters'
+import { createSimulationNodes, createSimulationLinks, createExternalNodes, createExternalLinks, createLayoutEdges, isAsyncEdge, truncateName, getNodeColor, getNodeRadius, getEdgeColor, getDomainColor } from './VisualizationDataAdapters'
 import type { Node, Edge, ExternalLink } from '@/types/riviere'
 import { parseNode, parseEdge, parseNodeId } from '@/lib/riviereTestData'
 const testSourceLocation = { repository: 'test-repo', filePath: 'src/test.ts' }
@@ -300,6 +300,44 @@ describe('VisualizationDataAdapters', () => {
       const radius = getNodeRadius('External')
       expect(typeof radius).toBe('number')
       expect(radius).toBeGreaterThan(0)
+    })
+  })
+
+  describe('createLayoutEdges', () => {
+    it('includes internal edges in layout', () => {
+      const internalEdges: Edge[] = [parseEdge({ source: 'a', target: 'b', type: 'sync' })]
+
+      const result = createLayoutEdges(internalEdges, undefined)
+
+      expect(result).toEqual([{ source: 'a', target: 'b' }])
+    })
+
+    it('includes external links as edges in layout', () => {
+      const internalEdges: Edge[] = [parseEdge({ source: 'a', target: 'b', type: 'sync' })]
+      const externalLinks: ExternalLink[] = [
+        { source: 'b', target: { name: 'Stripe', url: 'https://api.stripe.com' }, type: 'sync' },
+      ]
+
+      const result = createLayoutEdges(internalEdges, externalLinks)
+
+      expect(result).toEqual([
+        { source: 'a', target: 'b' },
+        { source: 'b', target: 'external:Stripe' },
+      ])
+    })
+
+    it('creates multiple edges for multiple external links', () => {
+      const internalEdges: Edge[] = []
+      const externalLinks: ExternalLink[] = [
+        { source: 'a', target: { name: 'Stripe', url: 'https://api.stripe.com' }, type: 'sync' },
+        { source: 'b', target: { name: 'Stripe', url: 'https://api.stripe.com' }, type: 'sync' },
+      ]
+
+      const result = createLayoutEdges(internalEdges, externalLinks)
+
+      expect(result).toHaveLength(2)
+      expect(result).toContainEqual({ source: 'a', target: 'external:Stripe' })
+      expect(result).toContainEqual({ source: 'b', target: 'external:Stripe' })
     })
   })
 })

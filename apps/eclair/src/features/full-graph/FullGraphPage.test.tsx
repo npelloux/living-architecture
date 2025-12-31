@@ -9,9 +9,10 @@ import { parseNode, parseEdge, parseDomainKey } from '@/lib/riviereTestData'
 import type { TooltipData, SimulationNode } from './types'
 const testSourceLocation = { repository: 'test-repo', filePath: 'src/test.ts' }
 
-const { capturedOnNodeHover } = vi.hoisted(() => {
-  const ref: { current: ((data: TooltipData | null) => void) | undefined } = { current: undefined }
-  return { capturedOnNodeHover: ref }
+const { capturedOnNodeHover, capturedVisibleTypes } = vi.hoisted(() => {
+  const hoverRef: { current: ((data: TooltipData | null) => void) | undefined } = { current: undefined }
+  const typesRef: { current: Set<import('@/types/riviere').NodeType> | undefined } = { current: undefined }
+  return { capturedOnNodeHover: hoverRef, capturedVisibleTypes: typesRef }
 })
 
 const mockGraph: RiviereGraph = {
@@ -39,14 +40,22 @@ vi.mock('@/contexts/ThemeContext', () => ({
 }))
 
 vi.mock('./components/ForceGraph/ForceGraph', () => ({
-  ForceGraph: (props: { onNodeHover?: (data: TooltipData | null) => void; highlightedNodeId?: string | null }) => {
+  ForceGraph: (props: {
+    onNodeHover?: (data: TooltipData | null) => void
+    highlightedNodeId?: string | null
+    visibleTypes?: Set<import('@/types/riviere').NodeType>
+  }) => {
     if (props.onNodeHover !== undefined) {
       capturedOnNodeHover.current = props.onNodeHover
+    }
+    if (props.visibleTypes !== undefined) {
+      capturedVisibleTypes.current = props.visibleTypes
     }
     return (
       <div
         data-testid="force-graph-container"
         data-highlighted-node={props.highlightedNodeId}
+        data-has-external-visible={props.visibleTypes?.has('External') ?? true}
       />
     )
   },
@@ -275,6 +284,75 @@ describe('FullGraphPage', () => {
       await user.click(showAllButton)
 
       expect(screen.getByText('3 nodes')).toBeInTheDocument()
+    })
+  })
+
+  describe('external node type filtering', () => {
+    const mockGraphWithExternals: RiviereGraph = {
+      ...mockGraph,
+      externalLinks: [
+        {
+          source: 'node-1',
+          target: { name: 'Stripe', url: 'https://api.stripe.com' },
+          type: 'sync',
+        },
+      ],
+    }
+
+    function renderWithExternals() {
+      return render(
+        <MemoryRouter initialEntries={['/']}>
+          <ExportProvider>
+            <FullGraphPage graph={mockGraphWithExternals} />
+          </ExportProvider>
+        </MemoryRouter>
+      )
+    }
+
+    test('shows External in node type filters when graph has external links', async () => {
+      const user = userEvent.setup()
+      renderWithExternals()
+
+      const filterToggle = screen.getByTestId('filter-toggle')
+      await user.click(filterToggle)
+
+      expect(screen.getByTestId('node-type-checkbox-External')).toBeInTheDocument()
+    })
+
+    test('shows correct count for External node type', async () => {
+      const user = userEvent.setup()
+      renderWithExternals()
+
+      const filterToggle = screen.getByTestId('filter-toggle')
+      await user.click(filterToggle)
+
+      const externalLabel = screen.getByTestId('node-type-checkbox-External').closest('label')
+      expect(externalLabel).toHaveTextContent('1')
+    })
+
+    test('does not show External in filters when graph has no external links', async () => {
+      const user = userEvent.setup()
+      renderWithRouter()
+
+      const filterToggle = screen.getByTestId('filter-toggle')
+      await user.click(filterToggle)
+
+      expect(screen.queryByTestId('node-type-checkbox-External')).not.toBeInTheDocument()
+    })
+
+    test('hides external nodes when External type is unchecked', async () => {
+      const user = userEvent.setup()
+      renderWithExternals()
+
+      const filterToggle = screen.getByTestId('filter-toggle')
+      await user.click(filterToggle)
+
+      expect(screen.getByTestId('force-graph-container')).toHaveAttribute('data-has-external-visible', 'true')
+
+      const externalCheckbox = screen.getByTestId('node-type-checkbox-External')
+      await user.click(externalCheckbox)
+
+      expect(screen.getByTestId('force-graph-container')).toHaveAttribute('data-has-external-visible', 'false')
     })
   })
 
