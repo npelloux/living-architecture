@@ -13,6 +13,7 @@ import { createEnrichCommand } from './commands/builder/enrich';
 import { createComponentSummaryCommand } from './commands/builder/component-summary';
 import { createComponentChecklistCommand } from './commands/builder/component-checklist';
 import { createCheckConsistencyCommand } from './commands/builder/check-consistency';
+import { createDefineCustomTypeCommand } from './commands/builder/define-custom-type';
 import { createEntryPointsCommand } from './commands/query/entry-points';
 import { createDomainsCommand } from './commands/query/domains';
 import { createTraceCommand } from './commands/query/trace';
@@ -63,6 +64,7 @@ export function createProgram(): Command {
   builderCmd.addCommand(createComponentSummaryCommand());
   builderCmd.addCommand(createComponentChecklistCommand());
   builderCmd.addCommand(createCheckConsistencyCommand());
+  builderCmd.addCommand(createDefineCustomTypeCommand());
 
   const queryCmd = program
     .command('query')

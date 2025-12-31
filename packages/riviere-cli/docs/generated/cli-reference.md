@@ -472,6 +472,30 @@ riviere builder check-consistency --json
 
 ---
 
+### `define-custom-type`
+
+Define a custom component type
+
+```bash
+riviere builder define-custom-type [options]
+```
+
+**Required:**
+| Flag | Description |
+|------|-------------|
+| `--name <name>` | Custom type name |
+| `--description <desc>` | Custom type description |
+| `--required-property <spec>` | Required property (format: name:type[:description]) |
+| `--optional-property <spec>` | Optional property (format: name:type[:description]) |
+| `--graph <path>` | Custom graph file path (default: .riviere/graph.json) |
+
+**Optional:**
+| Flag | Description |
+|------|-------------|
+| `--json` | Output result as JSON |
+
+---
+
 ## Query Commands
 
 Commands for analyzing and querying graphs.
