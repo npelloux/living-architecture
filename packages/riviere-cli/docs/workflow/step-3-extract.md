@@ -15,19 +15,19 @@ Find all component instances using patterns from Step 2 and add them to the grap
 
 Create graph with sources and domains:
 ```bash
-riviere builder init \
+npx riviere builder init \
   --source "https://github.com/your-org/your-repo" \
   --domain '{"name":"[name]","description":"[desc]","systemType":"domain"}'
 ```
 
 Add additional sources if needed:
 ```bash
-riviere builder add-source --repository "https://github.com/your-org/your-repo"
+npx riviere builder add-source --repository "https://github.com/your-org/your-repo"
 ```
 
 Add additional domains if needed:
 ```bash
-riviere builder add-domain --name "[name]" --system-type "[domain|bff|ui|other]" --description "[desc]"
+npx riviere builder add-domain --name "[name]" --system-type "[domain|bff|ui|other]" --description "[desc]"
 ```
 
 ## Extract Components
@@ -55,7 +55,7 @@ For each grep result:
 3. Add via CLI
 
 ```bash
-riviere builder add-component \
+npx riviere builder add-component \
   --type "[API|UseCase|DomainOp|Event|EventHandler|UI|Custom]" \
   --domain "[domain]" \
   --module "[module]" \
@@ -87,7 +87,7 @@ UseCases (extends BaseUseCase): 8 matches → 8 use cases extracted
 
 Generate summary:
 ```bash
-riviere builder component-summary --output ".riviere/step-3-summary.md"
+npx riviere builder component-summary --output ".riviere/step-3-summary.md"
 ```
 
 Check for:

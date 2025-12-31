@@ -13,7 +13,7 @@ Trace operational connections between components to create the flow graph.
 ## Generate Checklist
 
 ```bash
-riviere builder component-checklist --output=".riviere/step-4-checklist.md"
+npx riviere builder component-checklist --output=".riviere/step-4-checklist.md"
 ```
 
 ## Link Types
@@ -76,7 +76,7 @@ The link is **API → UseCase**.
 ### Code links (function calls within codebase)
 
 ```bash
-riviere builder link \
+npx riviere builder link \
   --from "[source-id]" \
   --to-type [Type] --to-domain [domain] --to-module [module] --to-name "[name]" \
   --link-type [sync|async]
@@ -86,14 +86,14 @@ riviere builder link \
 
 ```bash
 # Internal API (domain specified = must exist)
-riviere builder link-http \
+npx riviere builder link-http \
   --from "[source-id]" \
   --method [GET|POST|PUT|PATCH|DELETE] \
   --path "/path/to/endpoint" \
   --to-domain "[target-domain]"
 
 # External API (use link-external command)
-riviere builder link-external \
+npx riviere builder link-external \
   --from "[source-id]" \
   --system "[External System Name]" \
   --description "[what this external call does]"

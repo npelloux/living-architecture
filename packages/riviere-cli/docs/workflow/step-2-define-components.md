@@ -25,7 +25,7 @@ Also look for patterns that don't fit the built-in types. Present findings and a
 
 ## Extraction Rule Format
 
-Only extract fields that exist in the Rivière schema. Run `riviere builder add-component --help` to see valid fields per type.
+Only extract fields that exist in the Rivière schema. Run `npx riviere builder add-component --help` to see valid fields per type.
 
 **Avoid over-fitting:** Location should be broad (e.g., `src/` or `apps/`). Let class pattern and select do the identification work.
 

@@ -12,7 +12,7 @@ Add semantic information to DomainOps — state changes and business rules.
 ## Generate Checklist
 
 ```bash
-riviere builder component-checklist --type=DomainOp --output=".riviere/step-5-checklist.md"
+npx riviere builder component-checklist --type=DomainOp --output=".riviere/step-5-checklist.md"
 ```
 
 ## Process
@@ -56,7 +56,7 @@ Capture as plain English rules.
 ### 3. Enrich via CLI
 
 ```bash
-riviere builder enrich \
+npx riviere builder enrich \
   --id "[component-id]" \
   --state-change "from:[State1],to:[State2]" \
   --business-rule "Rule description"

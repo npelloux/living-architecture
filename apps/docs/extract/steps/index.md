@@ -4,6 +4,21 @@ Extract architecture from your codebase into a Rivière graph.
 
 This is a default workflow using AI to analyze code and the CLI to build the graph. You can customize it—replace steps, use different tools, or create your own extraction process. The CLI commands work independently of how you choose to run them.
 
+## Workflow Principles
+
+Where possible, use deterministic tools for faster, repeatable, and more reliable results. Leverage AI where code analysis alone doesn't work. As a starting point, using AI is helpful until you build your own tools.
+
+## The 6 Steps Overview
+
+| Step | Purpose |
+|------|---------|
+| **1. Understand** | Identify the domains, systems, and architectural conventions in your codebase—the foundations before extraction |
+| **2. Define** | Every codebase is unique. Define the specific rules for identifying architectural components in your codebase |
+| **3. Extract** | Scan the code to find components matching the rules and add them to the graph |
+| **4. Link** | Scan the code to find the links between your components |
+| **5. Enrich** | Add information not achieved during original extraction. Useful when deterministic tools handle earlier steps but AI is needed for semantic meaning |
+| **6. Validate** | Validate the graph—does it satisfy the schema? Are there orphan components? This is also a refinement loop to improve extraction efficiency |
+
 ## Prerequisites
 
 Open a terminal in your project directory and install the CLI:

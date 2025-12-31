@@ -16,12 +16,12 @@ Check the graph for orphans and schema compliance.
 ## 1. Check Orphans
 
 ```bash
-riviere builder check-consistency
+npx riviere builder check-consistency
 ```
 
 For JSON output:
 ```bash
-riviere builder check-consistency --json
+npx riviere builder check-consistency --json
 ```
 
 Review ALL orphan components. Orphans are warnings, not errors - but they often indicate missing links.
@@ -45,7 +45,7 @@ A high orphan count (>20%) usually indicates systematic linking failure in step 
 ## 2. Validate Schema
 
 ```bash
-riviere builder validate
+npx riviere builder validate
 ```
 
 Full JSON Schema validation. Fix any errors before proceeding.
