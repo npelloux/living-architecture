@@ -64,6 +64,25 @@ export function updateHighlight({ node, link, filteredEdges, highlightedNodeIds 
   })
 }
 
+function appendArrowMarker(
+  defs: d3.Selection<SVGDefsElement, unknown, d3.BaseType, unknown>,
+  id: string,
+  fill: string
+): void {
+  defs
+    .append('marker')
+    .attr('id', id)
+    .attr('viewBox', '0 -5 10 10')
+    .attr('refX', 8)
+    .attr('refY', 0)
+    .attr('markerWidth', 6)
+    .attr('markerHeight', 6)
+    .attr('orient', 'auto')
+    .append('path')
+    .attr('d', 'M0,-5L10,0L0,5')
+    .attr('fill', fill)
+}
+
 export function setupSVGFiltersAndMarkers(defs: d3.Selection<SVGDefsElement, unknown, d3.BaseType, unknown>, theme: Theme): void {
   defs
     .append('filter')
@@ -86,31 +105,8 @@ export function setupSVGFiltersAndMarkers(defs: d3.Selection<SVGDefsElement, unk
       merge.append('feMergeNode').attr('in', 'SourceGraphic')
     })
 
-  defs
-    .append('marker')
-    .attr('id', 'arrowhead-sync')
-    .attr('viewBox', '0 -5 10 10')
-    .attr('refX', 10)
-    .attr('refY', 0)
-    .attr('markerWidth', 6)
-    .attr('markerHeight', 6)
-    .attr('orient', 'auto')
-    .append('path')
-    .attr('d', 'M0,-5L10,0L0,5')
-    .attr('fill', EDGE_COLORS[theme].sync)
-
-  defs
-    .append('marker')
-    .attr('id', 'arrowhead-async')
-    .attr('viewBox', '0 -5 10 10')
-    .attr('refX', 10)
-    .attr('refY', 0)
-    .attr('markerWidth', 6)
-    .attr('markerHeight', 6)
-    .attr('orient', 'auto')
-    .append('path')
-    .attr('d', 'M0,-5L10,0L0,5')
-    .attr('fill', EDGE_COLORS[theme].async)
+  appendArrowMarker(defs, 'arrowhead-sync', EDGE_COLORS[theme].sync)
+  appendArrowMarker(defs, 'arrowhead-async', EDGE_COLORS[theme].async)
 }
 
 export interface FitViewportParams {
@@ -144,8 +140,6 @@ export function calculateFitViewportTransform(params: FitViewportParams): { tran
 
   return { translateX, translateY, scale }
 }
-
-
 
 export interface SetupLinksParams {
   linkGroup: d3.Selection<SVGGElement, unknown, d3.BaseType, unknown>
@@ -225,7 +219,7 @@ export function setupNodes({
     .attr('font-size', '11px')
     .attr('font-weight', 600)
     .attr('fill', 'var(--text-primary)')
-    .text((d) => truncate(d.name, 18))
+    .text((d) => truncate(d.name, 30))
 
   node
     .append('text')

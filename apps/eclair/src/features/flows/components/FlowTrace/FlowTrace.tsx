@@ -66,7 +66,7 @@ export function FlowTrace({ steps, graph }: FlowTraceProps): React.ReactElement 
                   {index + 1}
                 </div>
                 <div className="flow-step-content">
-                  <div className="flow-step-name">{step.node.name}</div>
+                  <div className="flow-step-name" title={step.node.name}>{step.node.name}</div>
                   <div className="flow-step-meta">
                     {step.node.module} · {step.node.domain} · {step.node.type}
                   </div>

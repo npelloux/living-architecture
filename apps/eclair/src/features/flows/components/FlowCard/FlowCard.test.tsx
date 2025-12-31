@@ -138,6 +138,13 @@ describe('FlowCard', () => {
       expect(title).toHaveClass('flow-item-title')
     })
 
+    it('displays title attribute with full entry point name for tooltip', () => {
+      render(<FlowCard flow={createTestFlow()} graph={createTestGraph()} expanded={false} onToggle={() => {}} />)
+
+      const title = screen.getByText('POST /orders')
+      expect(title).toHaveAttribute('title', 'POST /orders')
+    })
+
     it('renders domain text', () => {
       render(<FlowCard flow={createTestFlow()} graph={createTestGraph()} expanded={false} onToggle={() => {}} />)
 

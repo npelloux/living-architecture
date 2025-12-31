@@ -168,6 +168,13 @@ describe('FlowTrace', () => {
 
       expect(screen.getByText('ui · checkout · UI')).toHaveClass('flow-step-meta')
     })
+
+    it('displays title attribute with full node name for tooltip', () => {
+      render(<FlowTrace steps={createTestSteps()} graph={createTestGraph()} />)
+
+      const stepName = screen.getByText('Order Form')
+      expect(stepName).toHaveAttribute('title', 'Order Form')
+    })
   })
 
   describe('edge indicators', () => {

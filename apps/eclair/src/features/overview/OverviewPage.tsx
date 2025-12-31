@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import type { RiviereGraph, SystemType, DomainName } from '@/types/riviere'
 import { domainNameSchema } from '@/types/riviere'
 import { useRiviereQuery } from '@/hooks/useRiviereQuery'
+import { useCodeLinkSettings } from '@/features/flows/components/CodeLinkMenu/useCodeLinkSettings'
 
 type ViewMode = 'grid' | 'list'
 type FilterType = 'all' | SystemType
@@ -227,24 +228,25 @@ interface DomainCardProps {
 
 function DomainCard({ domain, viewMode, graphName }: DomainCardProps): React.ReactElement {
   const repoName: string | undefined = domain.repository !== undefined ? domain.repository : graphName
+  const { settings } = useCodeLinkSettings()
+  const githubUrl = repoName !== undefined && settings.githubOrg !== null ? `${settings.githubOrg.replace(/\/$/, '')}/${repoName}` : null
 
   if (viewMode === 'list') {
     return (
-      <article className="flex items-center gap-6 rounded-[var(--radius)] border border-[var(--border-color)] bg-[var(--bg-secondary)] px-5 py-4 transition-all hover:border-[var(--primary)] hover:shadow-[var(--shadow)]">
-        <div className="min-w-0 flex-1">
+      <article
+        data-testid={`domain-card-${domain.id}`}
+        className="relative flex items-center gap-6 rounded-[var(--radius)] border border-[var(--border-color)] bg-[var(--bg-secondary)] px-5 py-4 transition-all hover:border-[var(--primary)] hover:shadow-[var(--shadow)]"
+      >
+        <Link to={`/domains/${domain.id}`} data-card-link className="absolute inset-0 z-0" aria-label={`View ${domain.id} details`} />
+        <div className="relative z-10 min-w-0 flex-1">
           <h3 className="text-base font-bold text-[var(--text-primary)]">{domain.id}</h3>
           <p className="truncate text-xs text-[var(--text-tertiary)]">
             {domain.description}
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
-          {repoName !== undefined && (
-            <a
-              href="#"
-              className="icon-btn"
-              title={`View source: ${repoName}`}
-              aria-label={`View source code for ${domain.id}`}
-            >
+        <div className="relative z-10 flex shrink-0 items-center gap-2">
+          {githubUrl !== null && (
+            <a href={githubUrl} target="_blank" rel="noopener noreferrer" className="icon-btn" title={`View source: ${repoName}`} aria-label={`View source code for ${domain.id}`}>
               <i className="ph ph-github-logo" aria-hidden="true" />
             </a>
           )}
@@ -270,8 +272,12 @@ function DomainCard({ domain, viewMode, graphName }: DomainCardProps): React.Rea
   }
 
   return (
-    <article className="flex h-full flex-col rounded-[var(--radius)] border border-[var(--border-color)] bg-[var(--bg-secondary)] p-5 transition-all hover:-translate-y-0.5 hover:border-[var(--primary)] hover:shadow-[var(--shadow)]">
-      <header className="mb-3">
+    <article
+      data-testid={`domain-card-${domain.id}`}
+      className="relative flex h-full flex-col rounded-[var(--radius)] border border-[var(--border-color)] bg-[var(--bg-secondary)] p-5 transition-all hover:-translate-y-0.5 hover:border-[var(--primary)] hover:shadow-[var(--shadow)]"
+    >
+      <Link to={`/domains/${domain.id}`} data-card-link className="absolute inset-0 z-0" aria-label={`View ${domain.id} details`} />
+      <header className="relative z-10 mb-3">
         <h3 className="text-base font-bold text-[var(--text-primary)]">{domain.id}</h3>
         <p className="line-clamp-2 text-xs leading-relaxed text-[var(--text-tertiary)]">
           {domain.description}
@@ -288,10 +294,12 @@ function DomainCard({ domain, viewMode, graphName }: DomainCardProps): React.Rea
         <EntryPointsSection entryPoints={domain.entryPoints} />
       )}
 
-      <footer className="mt-auto flex items-center justify-between border-t border-[var(--border-color)] pt-3">
-        {repoName !== undefined ? (
+      <footer className="relative z-10 mt-auto flex items-center justify-between border-t border-[var(--border-color)] pt-3">
+        {githubUrl !== null ? (
           <a
-            href="#"
+            href={githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] transition-colors hover:text-[var(--primary)]"
             aria-label={`GitHub repository ${repoName}`}
           >

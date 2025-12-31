@@ -39,7 +39,7 @@ export function FlowCard({ flow, graph, expanded, onToggle }: FlowCardProps): Re
       >
         <div data-testid="flow-item-left" className="flow-item-left">
           <NodeTypeBadge type={entryPoint.type} />
-          <span className="flow-item-title">{entryPoint.name}</span>
+          <span className="flow-item-title" title={entryPoint.name}>{entryPoint.name}</span>
           <span className="flow-item-domain">{entryPoint.domain}</span>
         </div>
         <div data-testid="flow-item-actions" className="flow-item-actions">

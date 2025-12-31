@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
@@ -42,6 +42,10 @@ function createTestGraph(overrides: Partial<RiviereGraph> = {}): RiviereGraph {
 }
 
 describe('OverviewPage', () => {
+  afterEach(() => {
+    localStorage.clear()
+  })
+
   it('renders page header with title and subtitle', () => {
     const graph = createTestGraph()
 
@@ -133,6 +137,7 @@ describe('OverviewPage', () => {
   })
 
   it('renders repository link when sourceLocation has repository', () => {
+    localStorage.setItem('eclair-code-link-settings', JSON.stringify({ vscodePath: null, githubOrg: 'https://github.com/org', githubBranch: 'main' }))
     const graph = createTestGraph({
       components: [
         parseNode({
@@ -210,6 +215,7 @@ describe('OverviewPage', () => {
   })
 
   it('renders repository link for each domain card', () => {
+    localStorage.setItem('eclair-code-link-settings', JSON.stringify({ vscodePath: null, githubOrg: 'https://github.com/org', githubBranch: 'main' }))
     const graph = createTestGraph()
 
     renderWithRouter(<OverviewPage graph={graph} />)
@@ -399,6 +405,67 @@ describe('OverviewPage', () => {
 
       const cards = screen.queryAllByRole('link', { name: /View details for/i })
       expect(cards).toHaveLength(0)
+    })
+  })
+
+  describe('GitHub repository links', () => {
+    it('constructs GitHub URL from settings and repository name', () => {
+      localStorage.setItem('eclair-code-link-settings', JSON.stringify({
+        vscodePath: null,
+        githubOrg: 'https://github.com/myorg',
+        githubBranch: 'main',
+      }))
+
+      const graph = createTestGraph()
+
+      renderWithRouter(<OverviewPage graph={graph} />)
+
+      const githubLinks = screen.getAllByRole('link', { name: /github/i })
+      const firstGithubLink = githubLinks[0]
+      expect(firstGithubLink).toHaveAttribute('href', 'https://github.com/myorg/test-repo')
+    })
+
+    it('opens GitHub link in new tab', () => {
+      localStorage.setItem('eclair-code-link-settings', JSON.stringify({
+        vscodePath: null,
+        githubOrg: 'https://github.com/myorg',
+        githubBranch: 'main',
+      }))
+
+      const graph = createTestGraph()
+
+      renderWithRouter(<OverviewPage graph={graph} />)
+
+      const githubLinks = screen.getAllByRole('link', { name: /github/i })
+      const firstGithubLink = githubLinks[0]
+      expect(firstGithubLink).toHaveAttribute('target', '_blank')
+      expect(firstGithubLink).toHaveAttribute('rel', 'noopener noreferrer')
+    })
+  })
+
+  describe('Domain card click navigation', () => {
+    it('navigates to domain detail page when grid card is clicked', () => {
+      const graph = createTestGraph()
+
+      renderWithRouter(<OverviewPage graph={graph} />)
+
+      const orderDomainCard = screen.getByTestId('domain-card-order-domain')
+      const cardLink = orderDomainCard.querySelector('a[data-card-link]')
+      expect(cardLink).toHaveAttribute('href', '/domains/order-domain')
+    })
+
+    it('navigates to domain detail page when list card is clicked', async () => {
+      const user = userEvent.setup()
+      const graph = createTestGraph()
+
+      renderWithRouter(<OverviewPage graph={graph} />)
+
+      const listButton = screen.getByRole('button', { name: /List/i })
+      await user.click(listButton)
+
+      const orderDomainCard = screen.getByTestId('domain-card-order-domain')
+      const cardLink = orderDomainCard.querySelector('a[data-card-link]')
+      expect(cardLink).toHaveAttribute('href', '/domains/order-domain')
     })
   })
 
