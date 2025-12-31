@@ -21,7 +21,19 @@ Read `.riviere/config/metadata.md` for codebase context.
 
 For each type in this codebase, define an extraction rule.
 
-Also look for patterns that don't fit the built-in types. Present findings and ask user which to include.
+Also look for patterns that don't fit the built-in types. For each potential Custom type:
+1. Present the pattern to the user with a suggested name
+2. Record user's decision (accepted/rejected) in component-definitions.md
+
+Example:
+```markdown
+## Proposed Custom Types
+
+| Pattern | Suggested Name | Decision |
+|---------|----------------|----------|
+| Background jobs in `src/jobs/` | `BackgroundJob` | Accepted |
+| Saga orchestrators | `Saga` | Rejected - treat as UseCase |
+```
 
 ## Extraction Rule Format
 
@@ -95,9 +107,20 @@ export class Employee extends Aggregate {
 \`\`\`
 ```
 
+### Critical: Rules Only
+
+Do NOT list actual components found in the codebase. Step 2 defines **patterns** for finding components. Step 3 performs the actual scan.
+
+**Wrong:** "Components: order-begin, order-confirm, order-cancel"
+**Right:** "Pattern: public methods in classes extending Aggregate"
+
+One brief example per rule is acceptable to illustrate the pattern.
+
 ## Output
 
 Save as `.riviere/config/component-definitions.md`
+
+**Reminder:** This file contains extraction rules and examples only—not a list of components.
 
 ---
 
