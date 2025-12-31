@@ -79,7 +79,7 @@ describe('EntitiesPage', () => {
     const graph = createTestGraph()
     render(<EntitiesPage graph={graph} />)
 
-    expect(screen.getAllByText('order-domain').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('order-domain')).toHaveLength(1)
     expect(screen.getByText('Order')).toBeInTheDocument()
   })
 
