@@ -4,21 +4,15 @@ import type {
   NodeType,
   SystemType,
   EdgeType,
-  OperationBehavior,
-  OperationSignature,
-  StateTransition,
   SourceLocation,
-  OperationName,
-  StateName,
-  Invariant,
   EntryPoint,
   NodeId,
 } from '@/types/riviere'
 import { nodeIdSchema } from '@/types/riviere'
-import { RiviereQuery } from '@living-architecture/riviere-query'
+import { RiviereQuery, type Entity } from '@living-architecture/riviere-query'
 import type { NodeBreakdown } from './domainNodeBreakdown'
 export type { NodeBreakdown } from './domainNodeBreakdown'
-import { extractEntities, countNodesByType, formatDomainNodes, extractEntryPoints } from './domainNodeBreakdown'
+import { countNodesByType, formatDomainNodes, extractEntryPoints } from './domainNodeBreakdown'
 
 export interface DomainNode {
   id: string
@@ -26,40 +20,6 @@ export interface DomainNode {
   name: string
   location: string | undefined
   sourceLocation: SourceLocation | undefined
-}
-
-export interface OperationDetail {
-  id: string
-  operationName: OperationName
-  name: string
-  behavior: OperationBehavior | undefined
-  stateChanges: StateTransition[] | undefined
-  signature: OperationSignature | undefined
-  sourceLocation: SourceLocation | undefined
-}
-
-export interface DomainEntity {
-  name: string
-  description: string | undefined
-  operations: OperationName[]
-  operationDetails: OperationDetail[]
-  allStates: StateName[]
-  invariants: Invariant[]
-  sourceLocation: SourceLocation | undefined
-}
-
-export function hasStates(entity: DomainEntity): boolean {
-  return entity.allStates.length > 0
-}
-
-export function hasInvariants(entity: DomainEntity): boolean {
-  return entity.invariants.length > 0
-}
-
-export function hasStateChanges(
-  operation: OperationDetail
-): operation is OperationDetail & { stateChanges: StateTransition[] } {
-  return operation.stateChanges !== undefined && operation.stateChanges.length > 0
 }
 
 export interface AggregatedConnection {
@@ -120,7 +80,7 @@ export interface DomainDetails {
   systemType: SystemType
   nodeBreakdown: NodeBreakdown
   nodes: DomainNode[]
-  entities: DomainEntity[]
+  entities: Entity[]
   events: DomainEvents
   crossDomainEdges: CrossDomainEdge[]
   aggregatedConnections: AggregatedConnection[]
@@ -174,7 +134,7 @@ export function extractDomainDetails(graph: RiviereGraph, domainId: DomainName):
 
   const breakdown = countNodesByType(domainNodes)
   const nodes = formatDomainNodes(domainNodes)
-  const entities = extractEntities(domainNodes)
+  const entities = query.entities(domainId)
 
   const queryPublished = query.publishedEvents(domainId)
   const queryHandlers = query.eventHandlers()

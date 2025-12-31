@@ -23,26 +23,16 @@ function createTestGraph(): RiviereGraph {
       name: 'Test Architecture',
       description: 'Test description',
       domains: parseDomainMetadata({
-        'order-domain': {
-          description: 'Order management',
-          systemType: 'domain',
-          entities: {
-            'Order': {
-              description: 'Core order entity',
-              stateMachine: {
-                states: ['Pending', 'Confirmed', 'Shipped'],
-                initialState: 'Pending',
-                terminalStates: ['Shipped'],
-              },
-              invariants: ['order.total > 0'],
-            },
-          },
-        },
+        'order-domain': { description: 'Order management', systemType: 'domain' },
+        'payment-domain': { description: 'Payment processing', systemType: 'domain' },
       }),
     },
     components: [
-      parseNode({ sourceLocation: testSourceLocation, id: 'n1', type: 'API', name: 'Place Order', domain: 'order-domain', module: 'm1', path: '/api/orders' }),
-      parseNode({ sourceLocation: testSourceLocation,         id: 'n2',
+      // Order domain - API and Order entity
+      parseNode({ sourceLocation: testSourceLocation, id: 'n1', type: 'API', name: 'Place Order', domain: 'order-domain', module: 'm1', httpMethod: 'POST', path: '/api/orders' }),
+      parseNode({
+        sourceLocation: testSourceLocation,
+        id: 'n2',
         type: 'DomainOp',
         name: 'Order.begin',
         domain: 'order-domain',
@@ -51,7 +41,9 @@ function createTestGraph(): RiviereGraph {
         operationName: 'begin',
         stateChanges: [{ from: 'Draft', to: 'Pending' }],
       }),
-      parseNode({ sourceLocation: testSourceLocation,         id: 'n3',
+      parseNode({
+        sourceLocation: testSourceLocation,
+        id: 'n3',
         type: 'DomainOp',
         name: 'Order.confirm',
         domain: 'order-domain',
@@ -59,6 +51,28 @@ function createTestGraph(): RiviereGraph {
         entity: 'Order',
         operationName: 'confirm',
         stateChanges: [{ from: 'Pending', to: 'Confirmed' }],
+      }),
+      // Payment domain - Payment entity
+      parseNode({
+        sourceLocation: testSourceLocation,
+        id: 'n4',
+        type: 'DomainOp',
+        name: 'Payment.process',
+        domain: 'payment-domain',
+        module: 'm2',
+        entity: 'Payment',
+        operationName: 'process',
+      }),
+      // Payment domain - Invoice entity
+      parseNode({
+        sourceLocation: testSourceLocation,
+        id: 'n5',
+        type: 'DomainOp',
+        name: 'Invoice.generate',
+        domain: 'payment-domain',
+        module: 'm2',
+        entity: 'Invoice',
+        operationName: 'generate',
       }),
     ],
     links: [
@@ -75,12 +89,15 @@ describe('EntitiesPage', () => {
     expect(screen.getByRole('heading', { name: 'Entities' })).toBeInTheDocument()
   })
 
-  it('displays entities grouped by domain', () => {
+  it('displays all entities from graph', () => {
     const graph = createTestGraph()
     render(<EntitiesPage graph={graph} />)
 
-    expect(screen.getAllByText('order-domain')).toHaveLength(1)
+    // Shows entities from all domains
     expect(screen.getByText('Order')).toBeInTheDocument()
+    expect(screen.getByText('Payment')).toBeInTheDocument()
+    expect(screen.getByText('Invoice')).toBeInTheDocument()
+    expect(screen.getByText(/3 entities found/)).toBeInTheDocument()
   })
 
   it('renders state machine when entity card is expanded', async () => {
@@ -112,27 +129,30 @@ describe('EntitiesPage', () => {
     expect(screen.getByText(/confirm/)).toBeInTheDocument()
   })
 
-  it('filters entities by search query', async () => {
+  it('filters entities by search query - shows matching, hides non-matching', async () => {
     const graph = createTestGraph()
     const user = userEvent.setup()
     render(<EntitiesPage graph={graph} />)
 
     const searchInput = screen.getByPlaceholderText('Search entities...')
-    await user.type(searchInput, 'Order')
+    await user.type(searchInput, 'Invoice')
 
-    expect(screen.getByText('Order')).toBeInTheDocument()
-    expect(screen.getByText(/1 entity found/)).toBeInTheDocument()
+    expect(screen.getByText('Invoice')).toBeInTheDocument()
+    expect(screen.queryByText('Order')).not.toBeInTheDocument()
+    expect(screen.queryByText('Payment')).not.toBeInTheDocument()
   })
 
-  it('filters entities by domain', async () => {
+  it('filters entities by domain - shows domain entities, hides others', async () => {
     const graph = createTestGraph()
     const user = userEvent.setup()
     render(<EntitiesPage graph={graph} />)
 
     const domainSelect = screen.getByDisplayValue('All Domains')
-    await user.selectOptions(domainSelect, 'order-domain')
+    await user.selectOptions(domainSelect, 'payment-domain')
 
-    expect(screen.getByText('Order')).toBeInTheDocument()
+    expect(screen.getByText('Payment')).toBeInTheDocument()
+    expect(screen.getByText('Invoice')).toBeInTheDocument()
+    expect(screen.queryByText('Order')).not.toBeInTheDocument()
   })
 
   it('navigates to full graph with node ID when view on graph button clicked', async () => {
@@ -145,10 +165,11 @@ describe('EntitiesPage', () => {
       </MemoryRouter>
     )
 
-    const graphButton = screen.getByTitle('View on Graph')
-    await user.click(graphButton)
+    // Entities sorted alphabetically: Invoice, Order, Payment - click first one (Invoice)
+    const graphButtons = screen.getAllByTitle('View on Graph')
+    await user.click(graphButtons[0])
 
-    expect(mockNavigate).toHaveBeenCalledWith('/full-graph?node=n2')
+    expect(mockNavigate).toHaveBeenCalledWith('/full-graph?node=n5')
   })
 
   it('resets to all domains filter after selecting a specific domain', async () => {

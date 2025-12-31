@@ -1,5 +1,6 @@
 import type { RiviereGraph, DomainOpComponent } from '@living-architecture/riviere-schema'
-import type { Entity, EntityTransition } from './event-types'
+import { Entity } from './event-types'
+import type { EntityTransition } from './event-types'
 import type { State, Domain, ComponentCounts } from './domain-types'
 import { parseEntityName, parseDomainName, parseState, parseOperationName } from './domain-types'
 import { componentsInDomain } from './component-queries'
@@ -20,20 +21,40 @@ export function operationsForEntity(graph: RiviereGraph, entityName: string): Do
   return graph.components.filter((c): c is DomainOpComponent => c.type === 'DomainOp' && c.entity === entityName)
 }
 
+interface PartialEntity {
+  name: string
+  domain: string
+  operations: DomainOpComponent[]
+}
+
 export function queryEntities(graph: RiviereGraph, domainName?: string): Entity[] {
   const domainOps = graph.components.filter((c): c is DomainOpComponent & { entity: string } => c.type === 'DomainOp' && c.entity !== undefined)
   const filtered = domainName ? domainOps.filter((op) => op.domain === domainName) : domainOps
-  const entityMap = new Map<string, Entity>()
+  const entityMap = new Map<string, PartialEntity>()
   for (const op of filtered) {
     const key = `${op.domain}:${op.entity}`
     const existing = entityMap.get(key)
-    if (existing) {
+    if (existing !== undefined) {
       entityMap.set(key, { ...existing, operations: [...existing.operations, op] })
     } else {
-      entityMap.set(key, { name: parseEntityName(op.entity), domain: parseDomainName(op.domain), operations: [op] })
+      entityMap.set(key, { name: op.entity, domain: op.domain, operations: [op] })
     }
   }
   return Array.from(entityMap.values())
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((partial) => createEntity(graph, partial))
+}
+
+function createEntity(graph: RiviereGraph, partial: PartialEntity): Entity {
+  const sortedOperations = [...partial.operations].sort((a, b) => a.operationName.localeCompare(b.operationName))
+  return new Entity(
+    parseEntityName(partial.name),
+    parseDomainName(partial.domain),
+    sortedOperations,
+    statesForEntity(graph, partial.name),
+    transitionsForEntity(graph, partial.name),
+    businessRulesForEntity(graph, partial.name),
+  )
 }
 
 export function businessRulesForEntity(graph: RiviereGraph, entityName: string): string[] {

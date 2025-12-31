@@ -72,6 +72,9 @@ describe('entities', () => {
         name: 'Order',
         domain: 'orders',
         operations: [beginOp, shipOp],
+        states: [],
+        transitions: [],
+        businessRules: [],
       },
     ])
   })
@@ -102,8 +105,221 @@ describe('entities', () => {
         name: 'Order',
         domain: 'orders',
         operations: [orderOp],
+        states: [],
+        transitions: [],
+        businessRules: [],
       },
     ])
+  })
+
+  it('returns entities sorted alphabetically by name', () => {
+    const graph = createMinimalValidGraph()
+    const zebraOp = createDomainOpComponent({
+      id: 'orders:checkout:domainop:zebra.run',
+      name: 'Zebra.run()',
+      domain: 'orders',
+      operationName: 'run',
+      entity: 'Zebra',
+    })
+    const appleOp = createDomainOpComponent({
+      id: 'orders:checkout:domainop:apple.grow',
+      name: 'Apple.grow()',
+      domain: 'orders',
+      operationName: 'grow',
+      entity: 'Apple',
+    })
+    graph.components.push(zebraOp, appleOp)
+    const query = new RiviereQuery(graph)
+
+    const entities = query.entities()
+
+    expect(entities.map((e) => e.name)).toEqual(['Apple', 'Zebra'])
+  })
+
+  it('returns entity with states ordered by transition flow', () => {
+    const graph = createMinimalValidGraph()
+    const beginOp = createDomainOpComponent({
+      id: 'orders:checkout:domainop:order.begin',
+      name: 'Order.begin()',
+      domain: 'orders',
+      operationName: 'begin',
+      entity: 'Order',
+      stateChanges: [{ from: 'Draft', to: 'Placed' }],
+    })
+    const confirmOp = createDomainOpComponent({
+      id: 'orders:checkout:domainop:order.confirm',
+      name: 'Order.confirm()',
+      domain: 'orders',
+      operationName: 'confirm',
+      entity: 'Order',
+      stateChanges: [{ from: 'Placed', to: 'Confirmed' }],
+    })
+    graph.components.push(beginOp, confirmOp)
+    const query = new RiviereQuery(graph)
+
+    const entities = query.entities()
+
+    expect(entities[0]?.states).toEqual(['Draft', 'Placed', 'Confirmed'])
+  })
+
+  it('returns entity with transitions including triggeredBy operation', () => {
+    const graph = createMinimalValidGraph()
+    const beginOp = createDomainOpComponent({
+      id: 'orders:checkout:domainop:order.begin',
+      name: 'Order.begin()',
+      domain: 'orders',
+      operationName: 'begin',
+      entity: 'Order',
+      stateChanges: [{ from: 'Draft', to: 'Placed' }],
+    })
+    graph.components.push(beginOp)
+    const query = new RiviereQuery(graph)
+
+    const entities = query.entities()
+
+    expect(entities[0]?.transitions).toEqual([
+      { from: 'Draft', to: 'Placed', triggeredBy: 'begin' },
+    ])
+  })
+
+  it('returns entity with deduplicated businessRules from all operations', () => {
+    const graph = createMinimalValidGraph()
+    const beginOp = createDomainOpComponent({
+      id: 'orders:checkout:domainop:order.begin',
+      name: 'Order.begin()',
+      domain: 'orders',
+      operationName: 'begin',
+      entity: 'Order',
+      businessRules: ['Total must be positive', 'Customer must be verified'],
+    })
+    const shipOp = createDomainOpComponent({
+      id: 'orders:checkout:domainop:order.ship',
+      name: 'Order.ship()',
+      domain: 'orders',
+      operationName: 'ship',
+      entity: 'Order',
+      businessRules: ['Total must be positive', 'Order must be confirmed'],
+    })
+    graph.components.push(beginOp, shipOp)
+    const query = new RiviereQuery(graph)
+
+    const entities = query.entities()
+
+    expect(entities[0]?.businessRules).toEqual([
+      'Total must be positive',
+      'Customer must be verified',
+      'Order must be confirmed',
+    ])
+  })
+})
+
+describe('Entity methods', () => {
+  it('hasStates returns true when entity has states', () => {
+    const graph = createMinimalValidGraph()
+    graph.components.push(
+      createDomainOpComponent({
+        id: 'orders:checkout:domainop:order.begin',
+        name: 'Order.begin()',
+        domain: 'orders',
+        operationName: 'begin',
+        entity: 'Order',
+        stateChanges: [{ from: 'Draft', to: 'Placed' }],
+      }),
+    )
+    const query = new RiviereQuery(graph)
+
+    const entity = query.entities()[0]
+
+    expect(entity?.hasStates()).toBe(true)
+  })
+
+  it('hasStates returns false when entity has no states', () => {
+    const graph = createMinimalValidGraph()
+    graph.components.push(
+      createDomainOpComponent({
+        id: 'orders:checkout:domainop:order.validate',
+        name: 'Order.validate()',
+        domain: 'orders',
+        operationName: 'validate',
+        entity: 'Order',
+      }),
+    )
+    const query = new RiviereQuery(graph)
+
+    const entity = query.entities()[0]
+
+    expect(entity?.hasStates()).toBe(false)
+  })
+
+  it('hasBusinessRules returns true when entity has business rules', () => {
+    const graph = createMinimalValidGraph()
+    graph.components.push(
+      createDomainOpComponent({
+        id: 'orders:checkout:domainop:order.begin',
+        name: 'Order.begin()',
+        domain: 'orders',
+        operationName: 'begin',
+        entity: 'Order',
+        businessRules: ['Total must be positive'],
+      }),
+    )
+    const query = new RiviereQuery(graph)
+
+    const entity = query.entities()[0]
+
+    expect(entity?.hasBusinessRules()).toBe(true)
+  })
+
+  it('hasBusinessRules returns false when entity has no business rules', () => {
+    const graph = createMinimalValidGraph()
+    graph.components.push(
+      createDomainOpComponent({
+        id: 'orders:checkout:domainop:order.validate',
+        name: 'Order.validate()',
+        domain: 'orders',
+        operationName: 'validate',
+        entity: 'Order',
+      }),
+    )
+    const query = new RiviereQuery(graph)
+
+    const entity = query.entities()[0]
+
+    expect(entity?.hasBusinessRules()).toBe(false)
+  })
+
+  it('firstOperationId returns first operation id', () => {
+    const graph = createMinimalValidGraph()
+    graph.components.push(
+      createDomainOpComponent({
+        id: 'orders:checkout:domainop:order.begin',
+        name: 'Order.begin()',
+        domain: 'orders',
+        operationName: 'begin',
+        entity: 'Order',
+      }),
+      createDomainOpComponent({
+        id: 'orders:checkout:domainop:order.ship',
+        name: 'Order.ship()',
+        domain: 'orders',
+        operationName: 'ship',
+        entity: 'Order',
+      }),
+    )
+    const query = new RiviereQuery(graph)
+
+    const entity = query.entities()[0]
+
+    expect(entity?.firstOperationId()).toBe('orders:checkout:domainop:order.begin')
+  })
+
+  it('firstOperationId returns undefined when no operations', () => {
+    const graph = createMinimalValidGraph()
+    const query = new RiviereQuery(graph)
+
+    const entities = query.entities()
+
+    expect(entities).toHaveLength(0)
   })
 })
 

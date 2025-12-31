@@ -92,28 +92,13 @@ export interface EntityField {
   description?: string
 }
 
-export interface StateMachine {
-  states?: string[]
-  initialState?: string
-  terminalStates?: string[]
-  transitions?: StateTransition[]
-}
-
 export interface EntityDataShape {
   fields?: EntityField[]
-}
-
-export interface EntityDefinition {
-  description?: string
-  stateMachine?: StateMachine
-  invariants?: string[]
-  dataShape?: EntityDataShape
 }
 
 export interface DomainMetadata {
   description: string
   systemType: SystemType
-  entities?: Record<string, EntityDefinition>
 }
 
 export interface GraphMetadata {

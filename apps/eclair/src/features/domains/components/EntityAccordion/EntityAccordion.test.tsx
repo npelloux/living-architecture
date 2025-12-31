@@ -2,56 +2,53 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { EntityAccordion } from './EntityAccordion'
-import type { DomainEntity } from '../../extractDomainDetails'
-import {
-  operationNameSchema,
-  stateNameSchema,
-  invariantSchema,
-  parameterTypeSchema,
-  returnTypeSchema,
-  type OperationName,
-  type StateName,
-  type Invariant,
-  type ParameterType,
-  type ReturnType,
-} from '@/types/riviere'
+import { Entity } from '@living-architecture/riviere-query'
+import type { DomainOpComponent, SourceLocation } from '@living-architecture/riviere-schema'
 
-const parseOperation = (s: string): OperationName => operationNameSchema.parse(s)
-const parseState = (s: string): StateName => stateNameSchema.parse(s)
-const parseInvariant = (s: string): Invariant => invariantSchema.parse(s)
-const parseParameterType = (s: string): ParameterType => parameterTypeSchema.parse(s)
-const parseReturnType = (s: string): ReturnType => returnTypeSchema.parse(s)
+const defaultSourceLocation: SourceLocation = { repository: 'test-repo', filePath: 'test.ts' }
 
-function createEntity(overrides: Partial<DomainEntity> = {}): DomainEntity {
+function createDomainOp(
+  overrides: Partial<DomainOpComponent> & { id: string; operationName: string },
+): DomainOpComponent {
   return {
-    name: 'Order',
-    description: undefined,
-    operations: [parseOperation('begin'), parseOperation('confirm'), parseOperation('cancel')],
-    operationDetails: [
-      {
-        id: 'op-1',
-        operationName: parseOperation('begin'),
-        name: 'Order.begin',
-        behavior: { reads: ['inventory'], validates: ['stock'], modifies: ['order'], emits: ['OrderStarted'] },
-        stateChanges: [{ from: parseState('Draft'), to: parseState('Pending') }],
-        signature: undefined,
-        sourceLocation: undefined,
-      },
-      {
-        id: 'op-2',
-        operationName: parseOperation('confirm'),
-        name: 'Order.confirm',
-        behavior: undefined,
-        stateChanges: [{ from: parseState('Pending'), to: parseState('Confirmed') }],
-        signature: undefined,
-        sourceLocation: undefined,
-      },
-    ],
-    allStates: [parseState('Draft'), parseState('Pending'), parseState('Confirmed'), parseState('Cancelled')],
-    invariants: [],
-    sourceLocation: undefined,
+    type: 'DomainOp',
+    name: `Order.${overrides.operationName}`,
+    domain: 'orders',
+    module: 'mod',
+    sourceLocation: defaultSourceLocation,
     ...overrides,
   }
+}
+
+function createEntity(overrides: {
+  name?: string
+  domain?: string
+  operations?: DomainOpComponent[]
+  states?: string[]
+  businessRules?: string[]
+} = {}): Entity {
+  const operations = overrides.operations ?? [
+    createDomainOp({
+      id: 'op-1',
+      operationName: 'begin',
+      behavior: { reads: ['inventory'], validates: ['stock'], modifies: ['order'], emits: ['OrderStarted'] },
+      stateChanges: [{ from: 'Draft', to: 'Pending' }],
+    }),
+    createDomainOp({
+      id: 'op-2',
+      operationName: 'confirm',
+      stateChanges: [{ from: 'Pending', to: 'Confirmed' }],
+    }),
+  ]
+
+  return new Entity(
+    overrides.name ?? 'Order',
+    overrides.domain ?? 'orders',
+    operations,
+    overrides.states ?? ['Draft', 'Pending', 'Confirmed', 'Cancelled'],
+    [],
+    overrides.businessRules ?? [],
+  )
 }
 
 describe('EntityAccordion', () => {
@@ -64,7 +61,11 @@ describe('EntityAccordion', () => {
 
     it('renders operation count', () => {
       const entity = createEntity({
-        operations: [parseOperation('a'), parseOperation('b'), parseOperation('c')],
+        operations: [
+          createDomainOp({ id: 'op-a', operationName: 'a' }),
+          createDomainOp({ id: 'op-b', operationName: 'b' }),
+          createDomainOp({ id: 'op-c', operationName: 'c' }),
+        ],
       })
 
       render(<EntityAccordion entity={entity} />)
@@ -74,7 +75,7 @@ describe('EntityAccordion', () => {
 
     it('renders state count when states exist', () => {
       const entity = createEntity({
-        allStates: [parseState('A'), parseState('B'), parseState('C'), parseState('D')],
+        states: ['A', 'B', 'C', 'D'],
       })
 
       render(<EntityAccordion entity={entity} />)
@@ -134,12 +135,12 @@ describe('EntityAccordion', () => {
       expect(screen.getByText('Confirmed')).toBeInTheDocument()
     })
 
-    it('shows invariants section when entity has invariants', async () => {
+    it('shows business rules section when entity has businessRules', async () => {
       const user = userEvent.setup()
       const entity = createEntity({
-        invariants: [
-          parseInvariant('Order must have at least one item'),
-          parseInvariant('Total amount must be positive'),
+        businessRules: [
+          'Order must have at least one item',
+          'Total amount must be positive',
         ],
       })
 
@@ -152,9 +153,9 @@ describe('EntityAccordion', () => {
       expect(screen.getByText('Total amount must be positive')).toBeInTheDocument()
     })
 
-    it('does not show invariants section when entity has no invariants', async () => {
+    it('does not show business rules section when entity has no businessRules', async () => {
       const user = userEvent.setup()
-      const entity = createEntity({ invariants: [] })
+      const entity = createEntity({ businessRules: [] })
 
       render(<EntityAccordion entity={entity} />)
 
@@ -208,31 +209,29 @@ describe('EntityAccordion', () => {
     it('renders code link menu for operations with sourceLocation', async () => {
       const user = userEvent.setup()
       const entity = createEntity({
-        operationDetails: [
-          {
+        name: 'Shipment',
+        operations: [
+          createDomainOp({
             id: 'op-1',
-            operationName: parseOperation('begin'),
-            name: 'Order.begin',
-            behavior: undefined,
-            stateChanges: undefined,
-            signature: undefined,
+            operationName: 'begin',
             sourceLocation: {
-              filePath: 'src/domain/Order.ts',
+              filePath: 'src/logistics/handler.ts',
               lineNumber: 42,
               repository: 'ecommerce-app',
             },
-          },
+          }),
         ],
       })
 
       render(<EntityAccordion entity={entity} />)
 
-      await user.click(screen.getByRole('button', { name: /order/i }))
+      await user.click(screen.getByRole('button', { name: /shipment/i }))
 
-      expect(screen.getByTestId('code-link-path')).toHaveTextContent('src/domain/Order.ts:42')
+      const codeLinks = screen.getAllByTestId('code-link-path')
+      expect(codeLinks[1] ?? codeLinks[0]).toHaveTextContent('src/logistics/handler.ts:42')
     })
 
-    it('does not render code link for operations without sourceLocation', async () => {
+    it('does not render code link for operations without lineNumber', async () => {
       const user = userEvent.setup()
       const entity = createEntity()
 
@@ -243,21 +242,28 @@ describe('EntityAccordion', () => {
       expect(screen.queryByTestId('code-link-path')).not.toBeInTheDocument()
     })
 
-    it('renders code link for entity header when sourceLocation exists', () => {
+    it('renders code link for entity header when first operation has sourceLocation with lineNumber', () => {
       const entity = createEntity({
-        sourceLocation: {
-          filePath: 'src/domain/Order.ts',
-          lineNumber: 10,
-          repository: 'ecommerce-app',
-        },
+        name: 'Invoice',
+        operations: [
+          createDomainOp({
+            id: 'op-1',
+            operationName: 'begin',
+            sourceLocation: {
+              filePath: 'src/billing/domain.ts',
+              lineNumber: 10,
+              repository: 'ecommerce-app',
+            },
+          }),
+        ],
       })
 
       render(<EntityAccordion entity={entity} />)
 
-      expect(screen.getAllByTestId('code-link-path')[0]).toHaveTextContent('src/domain/Order.ts:10')
+      expect(screen.getAllByTestId('code-link-path')[0]).toHaveTextContent('src/billing/domain.ts:10')
     })
 
-    it('does not render entity header code link when sourceLocation is undefined', () => {
+    it('does not render entity header code link when first operation has no lineNumber', () => {
       render(<EntityAccordion entity={createEntity()} />)
 
       expect(screen.queryAllByTestId('code-link-path')).toHaveLength(0)
@@ -266,27 +272,25 @@ describe('EntityAccordion', () => {
     it('opens dropdown menu when operation code link is clicked', async () => {
       const user = userEvent.setup()
       const entity = createEntity({
-        operationDetails: [
-          {
+        name: 'Invoice',
+        operations: [
+          createDomainOp({
             id: 'op-1',
-            operationName: parseOperation('begin'),
-            name: 'Order.begin',
-            behavior: undefined,
-            stateChanges: undefined,
-            signature: undefined,
+            operationName: 'begin',
             sourceLocation: {
-              filePath: 'src/domain/Order.ts',
+              filePath: 'src/billing/domain.ts',
               lineNumber: 42,
               repository: 'ecommerce-app',
             },
-          },
+          }),
         ],
       })
 
       render(<EntityAccordion entity={entity} />)
 
-      await user.click(screen.getByRole('button', { name: /order/i }))
-      await user.click(screen.getByTestId('code-link-path'))
+      await user.click(screen.getByRole('button', { name: /invoice/i }))
+      const codeLinks = screen.getAllByTestId('code-link-path')
+      await user.click(codeLinks[1] ?? codeLinks[0])
 
       expect(screen.getByText('Open in VS Code')).toBeInTheDocument()
       expect(screen.getByText('Open on GitHub')).toBeInTheDocument()
@@ -323,12 +327,12 @@ describe('EntityAccordion', () => {
       expect(screen.queryByText('Reads')).not.toBeInTheDocument()
     })
 
-    it('shows "Governed by" section with entity invariants when method expanded', async () => {
+    it('shows "Governed by" section with entity businessRules when method expanded', async () => {
       const user = userEvent.setup()
       const entity = createEntity({
-        invariants: [
-          parseInvariant('Order must have at least one item'),
-          parseInvariant('Total amount must be positive'),
+        businessRules: [
+          'Order must have at least one item',
+          'Total amount must be positive',
         ],
       })
 
@@ -342,9 +346,9 @@ describe('EntityAccordion', () => {
       expect(methodContent).toHaveTextContent('Total amount must be positive')
     })
 
-    it('does not show "Governed by" section when entity has no invariants', async () => {
+    it('does not show "Governed by" section when entity has no businessRules', async () => {
       const user = userEvent.setup()
-      const entity = createEntity({ invariants: [] })
+      const entity = createEntity({ businessRules: [] })
 
       render(<EntityAccordion entity={entity} defaultExpanded />)
 
@@ -370,19 +374,15 @@ describe('EntityAccordion', () => {
 
     it('displays multiple state transitions with visual separators not raw commas', () => {
       const entity = createEntity({
-        operationDetails: [
-          {
+        operations: [
+          createDomainOp({
             id: 'op-multi-state',
-            operationName: parseOperation('processAndShip'),
-            name: 'Order.processAndShip',
-            behavior: undefined,
+            operationName: 'processAndShip',
             stateChanges: [
-              { from: parseState('Draft'), to: parseState('Active') },
-              { from: parseState('Active'), to: parseState('Shipped') },
+              { from: 'Draft', to: 'Active' },
+              { from: 'Active', to: 'Shipped' },
             ],
-            signature: undefined,
-            sourceLocation: undefined,
-          },
+          }),
         ],
       })
 
@@ -396,17 +396,12 @@ describe('EntityAccordion', () => {
     it('does not render state transition when operation has no stateChanges', async () => {
       const user = userEvent.setup()
       const entity = createEntity({
-        allStates: [],
-        operationDetails: [
-          {
+        states: [],
+        operations: [
+          createDomainOp({
             id: 'op-no-state',
-            operationName: parseOperation('validate'),
-            name: 'Order.validate',
-            behavior: undefined,
-            stateChanges: undefined,
-            signature: undefined,
-            sourceLocation: undefined,
-          },
+            operationName: 'validate',
+          }),
         ],
       })
 
@@ -468,22 +463,18 @@ describe('EntityAccordion', () => {
   describe('method signature', () => {
     it('renders parameters with name and type', () => {
       const entity = createEntity({
-        operationDetails: [
-          {
+        operations: [
+          createDomainOp({
             id: 'op-with-sig',
-            operationName: parseOperation('release'),
-            name: 'Order.release',
-            behavior: undefined,
-            stateChanges: undefined,
+            operationName: 'release',
             signature: {
               parameters: [
-                { name: 'orderId', type: parseParameterType('string') },
-                { name: 'reason', type: parseParameterType('ReleaseReason') },
+                { name: 'orderId', type: 'string' },
+                { name: 'reason', type: 'ReleaseReason' },
               ],
-              returnType: parseReturnType('void'),
+              returnType: 'void',
             },
-            sourceLocation: undefined,
-          },
+          }),
         ],
       })
 
@@ -496,19 +487,15 @@ describe('EntityAccordion', () => {
 
     it('renders empty parentheses when no parameters', () => {
       const entity = createEntity({
-        operationDetails: [
-          {
+        operations: [
+          createDomainOp({
             id: 'op-no-params',
-            operationName: parseOperation('cancel'),
-            name: 'Order.cancel',
-            behavior: undefined,
-            stateChanges: undefined,
+            operationName: 'cancel',
             signature: {
               parameters: [],
-              returnType: parseReturnType('void'),
+              returnType: 'void',
             },
-            sourceLocation: undefined,
-          },
+          }),
         ],
       })
 

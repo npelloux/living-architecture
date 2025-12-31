@@ -70,10 +70,10 @@ describe('extractDomainDetails entities extraction', () => {
     expect(result?.entities).toHaveLength(2)
 
     const orderEntity = result?.entities.find((e) => e.name === 'Order')
-    expect(orderEntity?.operations).toEqual(['begin', 'confirm'])
+    expect(orderEntity?.operations.map(op => op.operationName)).toEqual(['begin', 'confirm'])
 
     const orderItemEntity = result?.entities.find((e) => e.name === 'OrderItem')
-    expect(orderItemEntity?.operations).toEqual(['add'])
+    expect(orderItemEntity?.operations.map(op => op.operationName)).toEqual(['add'])
   })
 
   it('sorts entities alphabetically and operations alphabetically', () => {
@@ -91,7 +91,7 @@ describe('extractDomainDetails entities extraction', () => {
     const result = extractDomainDetails(graph, parseDomainKey('order-domain'))
 
     expect(result?.entities.map((e) => e.name)).toEqual(['Apple', 'Zebra'])
-    expect(result?.entities[0]?.operations).toEqual(['a', 'b'])
+    expect(result?.entities[0]?.operations.map(op => op.operationName)).toEqual(['a', 'b'])
   })
 
   it('returns empty array when no entities', () => {
@@ -109,7 +109,7 @@ describe('extractDomainDetails entities extraction', () => {
     expect(result?.entities).toEqual([])
   })
 
-  it('includes sourceLocation derived from first operation', () => {
+  it('includes sourceLocation on first operation', () => {
     const graph = createMinimalGraph({
       metadata: {
         domains: parseDomainMetadata({ 'order-domain': { description: 'Orders', systemType: 'domain' } }),
@@ -139,7 +139,7 @@ describe('extractDomainDetails entities extraction', () => {
     const result = extractDomainDetails(graph, parseDomainKey('order-domain'))
     const orderEntity = result?.entities.find((e) => e.name === 'Order')
 
-    expect(orderEntity?.sourceLocation).toEqual({ repository: 'test-repo', filePath: 'src/Order.ts', lineNumber: 10 })
+    expect(orderEntity?.operations[0]?.sourceLocation).toEqual({ repository: 'test-repo', filePath: 'src/Order.ts', lineNumber: 10 })
   })
 
   it('handles entity with minimal sourceLocation', () => {
@@ -163,10 +163,10 @@ describe('extractDomainDetails entities extraction', () => {
     const result = extractDomainDetails(graph, parseDomainKey('order-domain'))
     const orderEntity = result?.entities.find((e) => e.name === 'Order')
 
-    expect(orderEntity?.sourceLocation).toEqual({ repository: 'test-repo', filePath: 'unknown' })
+    expect(orderEntity?.operations[0]?.sourceLocation).toEqual({ repository: 'test-repo', filePath: 'unknown' })
   })
 
-  it('returns empty invariants when entity has no metadata', () => {
+  it('returns empty businessRules when operations have no businessRules', () => {
     const graph = createMinimalGraph({
       metadata: {
         domains: parseDomainMetadata({
@@ -188,7 +188,6 @@ describe('extractDomainDetails entities extraction', () => {
     const result = extractDomainDetails(graph, parseDomainKey('order-domain'))
 
     const orderEntity = result?.entities.find((e) => e.name === 'Order')
-    expect(orderEntity?.description).toBeUndefined()
-    expect(orderEntity?.invariants).toEqual([])
+    expect(orderEntity?.businessRules).toEqual([])
   })
 })

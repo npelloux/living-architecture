@@ -1,57 +1,27 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { RiviereGraph, DomainName } from '@/types/riviere'
-import { domainNameSchema, invariantSchema } from '@/types/riviere'
+import { RiviereQuery } from '@living-architecture/riviere-query'
+import type { Entity } from '@living-architecture/riviere-query'
+import type { RiviereGraph } from '@/types/riviere'
 import { EntityAccordion } from '../domains/components/EntityAccordion/EntityAccordion'
-import { extractEntities } from '../domains/domainNodeBreakdown'
-import type { DomainEntity } from '../domains/extractDomainDetails'
 
 interface EntitiesPageProps {
   graph: RiviereGraph
 }
 
-interface ExtendedDomainEntity extends DomainEntity {
-  domain: DomainName
-}
-
-function getAllEntitiesFromGraph(graph: RiviereGraph): ExtendedDomainEntity[] {
-  return Object.entries(graph.metadata.domains).flatMap(([domainNameRaw, domainMeta]) => {
-    const parsedDomainName = domainNameSchema.safeParse(domainNameRaw)
-    if (!parsedDomainName.success) {
-      return []
-    }
-
-    const domainNodes = graph.components.filter((n) => n.domain === parsedDomainName.data)
-    const domainEntities = extractEntities(domainNodes)
-
-    const entityMetadata = domainMeta.entities ?? {}
-
-    return domainEntities.map((entity) => {
-      const metadata = entityMetadata[entity.name]
-      const extendedEntity: ExtendedDomainEntity = {
-        ...entity,
-        domain: parsedDomainName.data,
-        description: metadata?.description,
-        invariants:
-          metadata?.invariants !== undefined
-            ? metadata.invariants.map((inv) => invariantSchema.parse(inv))
-            : [],
-      }
-      return extendedEntity
-    })
-  })
-}
-
 export function EntitiesPage({ graph }: EntitiesPageProps): React.ReactElement {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedDomain, setSelectedDomain] = useState<DomainName | 'all'>('all')
+  const [selectedDomain, setSelectedDomain] = useState<string>('all')
 
-  const handleViewOnGraph = useCallback((entityName: string) => {
-    navigate(`/full-graph?node=${entityName}`)
+  const handleViewOnGraph = useCallback((nodeId: string) => {
+    navigate(`/full-graph?node=${nodeId}`)
   }, [navigate])
 
-  const entities = useMemo(() => getAllEntitiesFromGraph(graph), [graph])
+  const entities = useMemo<Entity[]>(() => {
+    const query = new RiviereQuery(graph)
+    return query.entities()
+  }, [graph])
 
   const filteredEntities = useMemo(() => {
     return entities.filter((entity) => {
@@ -93,17 +63,7 @@ export function EntitiesPage({ graph }: EntitiesPageProps): React.ReactElement {
 
           <select
             value={selectedDomain}
-            onChange={(e) => {
-              const value = e.target.value
-              if (value === 'all') {
-                setSelectedDomain('all')
-              } else {
-                const parsed = domainNameSchema.safeParse(value)
-                if (parsed.success) {
-                  setSelectedDomain(parsed.data)
-                }
-              }
-            }}
+            onChange={(e) => setSelectedDomain(e.target.value)}
             className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-tertiary)] px-3 py-2 text-[var(--text-primary)] focus:border-[var(--primary)] focus:outline-none"
           >
             <option value="all">All Domains</option>

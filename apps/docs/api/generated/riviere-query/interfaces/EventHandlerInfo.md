@@ -1,6 +1,6 @@
 # Interface: EventHandlerInfo
 
-Defined in: [packages/riviere-query/src/event-types.ts:93](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-query/src/event-types.ts#L93)
+Defined in: [packages/riviere-query/src/event-types.ts:113](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-query/src/event-types.ts#L113)
 
 Information about an event handler component.
 
@@ -10,7 +10,7 @@ Information about an event handler component.
 
 > **domain**: `string` & `$brand`\<`"DomainName"`\>
 
-Defined in: [packages/riviere-query/src/event-types.ts:99](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-query/src/event-types.ts#L99)
+Defined in: [packages/riviere-query/src/event-types.ts:119](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-query/src/event-types.ts#L119)
 
 The domain containing the handler.
 
@@ -20,7 +20,7 @@ The domain containing the handler.
 
 > **handlerName**: `string` & `$brand`\<`"HandlerName"`\>
 
-Defined in: [packages/riviere-query/src/event-types.ts:97](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-query/src/event-types.ts#L97)
+Defined in: [packages/riviere-query/src/event-types.ts:117](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-query/src/event-types.ts#L117)
 
 The handler's name.
 
@@ -30,7 +30,7 @@ The handler's name.
 
 > **id**: `string` & `$brand`\<`"HandlerId"`\>
 
-Defined in: [packages/riviere-query/src/event-types.ts:95](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-query/src/event-types.ts#L95)
+Defined in: [packages/riviere-query/src/event-types.ts:115](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-query/src/event-types.ts#L115)
 
 The handler's component ID.
 
@@ -40,7 +40,7 @@ The handler's component ID.
 
 > **subscribedEvents**: `string` & `$brand`\<`"EventName"`\>[]
 
-Defined in: [packages/riviere-query/src/event-types.ts:101](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-query/src/event-types.ts#L101)
+Defined in: [packages/riviere-query/src/event-types.ts:121](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-query/src/event-types.ts#L121)
 
 List of event names this handler subscribes to.
 
@@ -50,6 +50,6 @@ List of event names this handler subscribes to.
 
 > **subscribedEventsWithDomain**: [`SubscribedEventWithDomain`](../type-aliases/SubscribedEventWithDomain.md)[]
 
-Defined in: [packages/riviere-query/src/event-types.ts:103](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-query/src/event-types.ts#L103)
+Defined in: [packages/riviere-query/src/event-types.ts:123](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-query/src/event-types.ts#L123)
 
 Subscribed events with source domain information.

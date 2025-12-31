@@ -11,15 +11,35 @@ import type {
 } from './domain-types'
 
 /**
- * A domain entity with its associated operations.
+ * A domain entity with its associated operations, states, and business rules.
  */
-export interface Entity {
-  /** The entity name. */
-  name: EntityName
-  /** The domain containing the entity. */
-  domain: DomainName
-  /** All domain operations targeting this entity. */
-  operations: DomainOpComponent[]
+export class Entity {
+  constructor(
+    /** The entity name. */
+    public readonly name: EntityName,
+    /** The domain containing the entity. */
+    public readonly domain: DomainName,
+    /** All domain operations targeting this entity. */
+    public readonly operations: DomainOpComponent[],
+    /** Ordered states derived from state transitions (initial → terminal). */
+    public readonly states: State[],
+    /** State transitions with triggering operations. */
+    public readonly transitions: EntityTransition[],
+    /** Deduplicated business rules from all operations. */
+    public readonly businessRules: string[],
+  ) {}
+
+  hasStates(): boolean {
+    return this.states.length > 0
+  }
+
+  hasBusinessRules(): boolean {
+    return this.businessRules.length > 0
+  }
+
+  firstOperationId(): string | undefined {
+    return this.operations[0]?.id
+  }
 }
 
 /**

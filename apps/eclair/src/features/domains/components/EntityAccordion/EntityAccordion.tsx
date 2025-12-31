@@ -1,38 +1,41 @@
 import { useState } from 'react'
-import type { DomainEntity } from '../../extractDomainDetails'
-import { hasStates, hasInvariants, hasStateChanges } from '../../extractDomainDetails'
+import type { Entity } from '@living-architecture/riviere-query'
+import type { DomainOpComponent } from '@living-architecture/riviere-schema'
 import { CodeLinkMenu } from '@/features/flows/components/CodeLinkMenu/CodeLinkMenu'
 
 interface EntityAccordionProps {
-  entity: DomainEntity
+  entity: Entity
   defaultExpanded?: boolean | undefined
   onViewOnGraph?: (nodeId: string) => void
 }
 
 interface EntityHeaderActionsProps {
-  entity: DomainEntity
+  entity: Entity
   isExpanded: boolean
   onViewOnGraph: ((nodeId: string) => void) | undefined
 }
 
 function EntityHeaderActions({ entity, isExpanded, onViewOnGraph }: EntityHeaderActionsProps): React.ReactElement {
+  const firstOp = entity.operations[0]
+  const firstOpId = entity.firstOperationId()
+
   return (
     <div className="flex items-center gap-2">
-      {entity.sourceLocation !== undefined && entity.sourceLocation.lineNumber !== undefined && (
+      {firstOp?.sourceLocation !== undefined && firstOp.sourceLocation.lineNumber !== undefined && (
         <CodeLinkMenu
-          filePath={entity.sourceLocation.filePath}
-          lineNumber={entity.sourceLocation.lineNumber}
-          repository={entity.sourceLocation.repository}
+          filePath={firstOp.sourceLocation.filePath}
+          lineNumber={firstOp.sourceLocation.lineNumber}
+          repository={firstOp.sourceLocation.repository}
         />
       )}
-      {onViewOnGraph !== undefined && entity.operationDetails[0] !== undefined && (
+      {onViewOnGraph !== undefined && firstOpId !== undefined && (
         <button
           type="button"
           className="graph-link-btn-sm"
           title="View on Graph"
           onClick={(e) => {
             e.stopPropagation()
-            onViewOnGraph(entity.operationDetails[0].id)
+            onViewOnGraph(firstOpId)
           }}
         >
           <i className="ph ph-graph" aria-hidden="true" />
@@ -54,7 +57,7 @@ export function EntityAccordion({
   const [isExpanded, setIsExpanded] = useState(defaultExpanded)
 
   const operationCount = entity.operations.length
-  const stateCount = entity.allStates.length
+  const stateCount = entity.states.length
 
   return (
     <div className="rounded-lg border border-[var(--border-color)]">
@@ -89,25 +92,25 @@ export function EntityAccordion({
 
       {isExpanded && (
         <div className="border-t border-[#8B5CF6] bg-[var(--bg-secondary)] p-4">
-          {hasStates(entity) && (
+          {entity.hasStates() && (
             <div className="mb-4">
               <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[var(--text-tertiary)]">
                 <i className="ph ph-flow-arrow text-[var(--primary)]" aria-hidden="true" />
                 State Machine
               </div>
               <div className="flex flex-wrap items-center gap-2 rounded-lg bg-[var(--bg-tertiary)] p-3">
-                {entity.allStates.map((state, index) => (
+                {entity.states.map((state, index) => (
                   <div key={state} className="flex items-center gap-2">
                     <span className={`rounded-lg border px-3 py-1.5 text-xs font-semibold ${
                       index === 0
                         ? 'border-[var(--green)] bg-[rgba(16,185,129,0.1)] text-[var(--text-primary)]'
-                        : index === entity.allStates.length - 1
+                        : index === entity.states.length - 1
                           ? 'border-[#8B5CF6] bg-[rgba(139,92,246,0.1)] text-[var(--text-primary)]'
                           : 'border-[var(--border-color)] bg-[var(--bg-secondary)] text-[var(--text-primary)]'
                     }`}>
                       {state}
                     </span>
-                    {index < entity.allStates.length - 1 && (
+                    {index < entity.states.length - 1 && (
                       <span className="text-[var(--text-tertiary)]">→</span>
                     )}
                   </div>
@@ -116,36 +119,36 @@ export function EntityAccordion({
             </div>
           )}
 
-          {hasInvariants(entity) && (
+          {entity.hasBusinessRules() && (
             <div className="mb-4">
               <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[var(--text-tertiary)]">
                 <i className="ph ph-shield-check text-[var(--primary)]" aria-hidden="true" />
                 Business Rules
               </div>
               <div className="space-y-2">
-                {entity.invariants.map((invariant, index) => (
+                {entity.businessRules.map((rule, index) => (
                   <div key={index} className="flex items-start gap-2 rounded-lg bg-[var(--bg-tertiary)] p-3 text-sm text-[var(--text-secondary)]">
                     <i className="ph ph-check-circle shrink-0 text-[var(--amber)]" aria-hidden="true" />
-                    <span>{invariant}</span>
+                    <span>{rule}</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {entity.operationDetails.length > 0 ? (
+          {entity.operations.length > 0 ? (
             <div>
               <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[var(--text-tertiary)]">
                 <i className="ph ph-code text-[var(--primary)]" aria-hidden="true" />
                 Methods
               </div>
               <div className="space-y-3">
-                {entity.operationDetails.map((op) => (
-                  <MethodCard key={op.id} operation={op} invariants={entity.invariants} />
+                {entity.operations.map((op) => (
+                  <MethodCard key={op.id} operation={op} businessRules={entity.businessRules} />
                 ))}
               </div>
             </div>
-          ) : !hasStates(entity) && !hasInvariants(entity) ? (
+          ) : !entity.hasStates() && !entity.hasBusinessRules() ? (
             <div className="text-sm italic text-[var(--text-tertiary)]">
               No states, rules, or methods defined
             </div>
@@ -157,25 +160,25 @@ export function EntityAccordion({
 }
 
 interface MethodCardProps {
-  operation: DomainEntity['operationDetails'][number]
-  invariants: DomainEntity['invariants']
+  operation: DomainOpComponent
+  businessRules: string[]
 }
 
-function MethodCard({ operation, invariants }: MethodCardProps): React.ReactElement {
+function MethodCard({ operation, businessRules }: MethodCardProps): React.ReactElement {
   const [isExpanded, setIsExpanded] = useState(false)
 
   return (
     <div className="rounded-lg bg-[var(--bg-secondary)] shadow-sm">
       <MethodCardHeader operation={operation} isExpanded={isExpanded} onToggle={() => setIsExpanded(!isExpanded)} />
       {isExpanded && operation.behavior !== undefined && (
-        <MethodCardContent behavior={operation.behavior} invariants={invariants} />
+        <MethodCardContent behavior={operation.behavior} businessRules={businessRules} />
       )}
     </div>
   )
 }
 
 interface MethodCardHeaderProps {
-  operation: DomainEntity['operationDetails'][number]
+  operation: DomainOpComponent
   isExpanded: boolean
   onToggle: () => void
 }
@@ -194,7 +197,7 @@ function MethodCardHeader({ operation, isExpanded, onToggle }: MethodCardHeaderP
 }
 
 interface MethodCardButtonProps {
-  operation: DomainEntity['operationDetails'][number]
+  operation: DomainOpComponent
   isExpanded: boolean
   onToggle: () => void
 }
@@ -215,7 +218,7 @@ function MethodCardButton({ operation, isExpanded, onToggle }: MethodCardButtonP
 }
 
 interface MethodSignatureProps {
-  operation: DomainEntity['operationDetails'][number]
+  operation: DomainOpComponent
 }
 
 function formatParameters(signature: NonNullable<MethodSignatureProps['operation']['signature']>): string {
@@ -242,7 +245,13 @@ function MethodSignature({ operation }: MethodSignatureProps): React.ReactElemen
 }
 
 interface StateChangesTagProps {
-  operation: DomainEntity['operationDetails'][number]
+  operation: DomainOpComponent
+}
+
+function hasStateChanges(
+  operation: DomainOpComponent
+): operation is DomainOpComponent & { stateChanges: NonNullable<DomainOpComponent['stateChanges']> } {
+  return operation.stateChanges !== undefined && operation.stateChanges.length > 0
 }
 
 function StateChangesTag({ operation }: StateChangesTagProps): React.ReactElement {
@@ -274,7 +283,7 @@ function MethodCardChevron({ isExpanded }: MethodCardChevronProps): React.ReactE
 }
 
 interface MethodCardActionProps {
-  operation: DomainEntity['operationDetails'][number]
+  operation: DomainOpComponent
 }
 
 function MethodCardAction({ operation }: MethodCardActionProps): React.ReactElement {
@@ -294,26 +303,26 @@ function MethodCardAction({ operation }: MethodCardActionProps): React.ReactElem
 }
 
 interface MethodCardContentProps {
-  behavior: Exclude<DomainEntity['operationDetails'][number]['behavior'], undefined>
-  invariants: DomainEntity['invariants']
+  behavior: Exclude<DomainOpComponent['behavior'], undefined>
+  businessRules: string[]
 }
 
-function MethodCardContent({ behavior, invariants }: MethodCardContentProps): React.ReactElement {
-  const hasInvariantsToShow = invariants.length > 0
+function MethodCardContent({ behavior, businessRules }: MethodCardContentProps): React.ReactElement {
+  const hasRulesToShow = businessRules.length > 0
 
   return (
     <div className="p-4" data-testid="method-card-content">
-      {hasInvariantsToShow && (
+      {hasRulesToShow && (
         <div className="mb-4">
           <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[var(--text-tertiary)]">
             <i className="ph ph-shield-check text-[var(--primary)]" aria-hidden="true" />
             Governed by
           </div>
           <div className="space-y-1">
-            {invariants.map((invariant, index) => (
+            {businessRules.map((rule, index) => (
               <div key={index} className="flex items-start gap-2 text-sm text-[var(--text-secondary)]">
                 <i className="ph ph-check-circle shrink-0 text-[var(--amber)]" aria-hidden="true" />
-                <span>{invariant}</span>
+                <span>{rule}</span>
               </div>
             ))}
           </div>

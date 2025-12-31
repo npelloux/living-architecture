@@ -283,7 +283,7 @@ describe('extractDomainDetails - advanced tests', () => {
 
       const result = extractDomainDetails(graph, parseDomainKey('order-domain'))
       const orderEntity = result?.entities.find((e) => e.name === 'Order')
-      const beginOp = orderEntity?.operationDetails?.find((op) => op.operationName === 'begin')
+      const beginOp = orderEntity?.operations.find((op) => op.operationName === 'begin')
 
       expect(beginOp?.behavior).toEqual({
         reads: ['items', 'customerId'],
@@ -313,7 +313,7 @@ describe('extractDomainDetails - advanced tests', () => {
 
       const result = extractDomainDetails(graph, parseDomainKey('order-domain'))
       const orderEntity = result?.entities.find((e) => e.name === 'Order')
-      const beginOp = orderEntity?.operationDetails?.find((op) => op.operationName === 'begin')
+      const beginOp = orderEntity?.operations.find((op) => op.operationName === 'begin')
 
       expect(beginOp?.stateChanges).toEqual([{ from: 'Draft', to: 'Placed' }])
     })
@@ -344,7 +344,7 @@ describe('extractDomainDetails - advanced tests', () => {
 
       const result = extractDomainDetails(graph, parseDomainKey('order-domain'))
       const orderEntity = result?.entities.find((e) => e.name === 'Order')
-      const beginOp = orderEntity?.operationDetails?.find((op) => op.operationName === 'begin')
+      const beginOp = orderEntity?.operations.find((op) => op.operationName === 'begin')
 
       expect(beginOp?.signature?.parameters).toHaveLength(2)
       expect(beginOp?.signature?.returnType).toBe('Order')
@@ -370,7 +370,7 @@ describe('extractDomainDetails - advanced tests', () => {
 
       const result = extractDomainDetails(graph, parseDomainKey('order-domain'))
       const orderEntity = result?.entities.find((e) => e.name === 'Order')
-      const beginOp = orderEntity?.operationDetails?.find((op) => op.operationName === 'begin')
+      const beginOp = orderEntity?.operations.find((op) => op.operationName === 'begin')
 
       expect(beginOp?.sourceLocation?.filePath).toBe('src/Order.ts')
       expect(beginOp?.sourceLocation?.lineNumber).toBe(23)
@@ -417,7 +417,7 @@ describe('extractDomainDetails - advanced tests', () => {
       const result = extractDomainDetails(graph, parseDomainKey('order-domain'))
       const orderEntity = result?.entities.find((e) => e.name === 'Order')
 
-      expect(orderEntity?.allStates).toEqual(['Draft', 'Placed', 'Confirmed', 'Shipped'])
+      expect(orderEntity?.states).toEqual(['Draft', 'Placed', 'Confirmed', 'Shipped'])
     })
   })
 })

@@ -1,6 +1,6 @@
 # Interface: KnownSourceEvent
 
-Defined in: [packages/riviere-query/src/event-types.ts:66](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-query/src/event-types.ts#L66)
+Defined in: [packages/riviere-query/src/event-types.ts:86](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-query/src/event-types.ts#L86)
 
 A subscribed event where the source domain is known.
 
@@ -10,7 +10,7 @@ A subscribed event where the source domain is known.
 
 > **eventName**: `string` & `$brand`\<`"EventName"`\>
 
-Defined in: [packages/riviere-query/src/event-types.ts:68](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-query/src/event-types.ts#L68)
+Defined in: [packages/riviere-query/src/event-types.ts:88](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-query/src/event-types.ts#L88)
 
 The event name.
 
@@ -20,7 +20,7 @@ The event name.
 
 > **sourceDomain**: `string` & `$brand`\<`"DomainName"`\>
 
-Defined in: [packages/riviere-query/src/event-types.ts:70](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-query/src/event-types.ts#L70)
+Defined in: [packages/riviere-query/src/event-types.ts:90](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-query/src/event-types.ts#L90)
 
 The domain that publishes this event.
 
@@ -30,6 +30,6 @@ The domain that publishes this event.
 
 > **sourceKnown**: `true`
 
-Defined in: [packages/riviere-query/src/event-types.ts:72](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-query/src/event-types.ts#L72)
+Defined in: [packages/riviere-query/src/event-types.ts:92](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-query/src/event-types.ts#L92)
 
 Indicates the source is known.
