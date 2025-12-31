@@ -80,6 +80,17 @@
         "dependencies": [],
         "priority": "low",
         "subtasks": []
+      },
+      {
+        "id": 68,
+        "title": "Set up Renovate and Knip",
+        "description": "Configure Renovate for automated dependency updates and Knip for detecting unused files, dependencies, and exports",
+        "details": "## Deliverable\nAutomated dependency updates and dead code detection for the monorepo.\n\n### Context\nThe monorepo currently lacks:\n- Automated dependency update tooling (dependencies go stale)\n- Unused code detection (dead code accumulates)\n\nRenovate automates dependency PRs. Knip finds unused files, dependencies, and exports.\n\n### Delivers\n1. Renovate configuration (renovate.json) at repo root - use GitHub Renovate App\n2. Knip configuration (knip.json or knip.ts) at repo root\n3. Knip integrated into verify gate\n\n### Acceptance Criteria\n- Given Renovate is configured, When a dependency has updates, Then Renovate creates a PR automatically\n- Given Knip is configured, When unused exports/dependencies exist, Then Knip reports them\n- Given Knip is in CI, When verify runs, Then unused code violations fail the build\n\n### Related Code\n- /package.json\n- /apps/*/package.json\n- /packages/*/package.json\n\n### Verification\n1. Run npx knip and verify it executes without config errors\n2. Verify Renovate dashboard shows repo is enabled",
+        "testStrategy": "",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": []
       }
     ],
     "metadata": {
@@ -92,7 +103,7 @@
       ],
       "created": "2025-12-31T18:44:27.260Z",
       "description": "Tasks for master context",
-      "updated": "2025-12-31T20:20:00.991Z"
+      "updated": "2025-12-31T20:51:43.746Z"
     }
   }
 }
