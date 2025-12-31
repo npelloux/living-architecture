@@ -11,9 +11,17 @@ Complete documentation for all Riviere CLI commands.
 
 ## Installation
 
+**JavaScript/TypeScript projects:**
 ```bash
-npm install @living-architecture/riviere-cli
+npm install -D @living-architecture/riviere-cli
 ```
+Then use `npx riviere ...`
+
+**Other languages (Java, Python, Go, etc.):**
+```bash
+npm install -g @living-architecture/riviere-cli
+```
+Then use `riviere ...`
 
 ## Usage
 

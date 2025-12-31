@@ -23,10 +23,17 @@ Where possible, use deterministic tools for faster, repeatable, and more reliabl
 
 Open a terminal in your project directory and install the CLI:
 
+**JavaScript/TypeScript projects:**
 ```bash
-cd /path/to/your/project
 npm install -D @living-architecture/riviere-cli
 ```
+Then use `npx riviere ...`
+
+**Other languages (Java, Python, Go, etc.):**
+```bash
+npm install -g @living-architecture/riviere-cli
+```
+Then use `riviere ...`
 
 ## The 6 Steps
 
