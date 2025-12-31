@@ -93,6 +93,7 @@ export interface EventHandlerComponent extends ComponentBase {
 export interface CustomComponent extends ComponentBase {
   type: 'Custom'
   customTypeName: string
+  metadata?: Record<string, unknown>
 }
 
 export type Component =

@@ -176,6 +176,33 @@ export async function createGraphWithComponent(testDir: string, component: objec
   await writeFile(join(graphDir, 'graph.json'), JSON.stringify(graph), 'utf-8');
 }
 
+export interface CustomTypeDefinition {
+  description?: string;
+  requiredProperties?: Record<string, { type: string; description?: string }>;
+  optionalProperties?: Record<string, { type: string; description?: string }>;
+}
+
+export async function createGraphWithCustomType(
+  testDir: string,
+  domainName: string,
+  customTypeName: string,
+  customTypeDefinition: CustomTypeDefinition
+): Promise<void> {
+  const graphDir = join(testDir, '.riviere');
+  await mkdir(graphDir, { recursive: true });
+  const graph = {
+    version: '1.0',
+    metadata: {
+      sources: [{ repository: 'https://github.com/org/repo' }],
+      domains: { [domainName]: { description: 'Test domain', systemType: 'domain' } },
+      customTypes: { [customTypeName]: customTypeDefinition },
+    },
+    components: [],
+    links: [],
+  };
+  await writeFile(join(graphDir, 'graph.json'), JSON.stringify(graph), 'utf-8');
+}
+
 export const domainOpComponent = {
   id: 'orders:checkout:domainop:confirm-order',
   type: 'DomainOp',

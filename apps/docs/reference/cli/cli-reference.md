@@ -11,17 +11,9 @@ Complete documentation for all Riviere CLI commands.
 
 ## Installation
 
-**JavaScript/TypeScript projects:**
 ```bash
-npm install -D @living-architecture/riviere-cli
+npm install @living-architecture/riviere-cli
 ```
-Then use `npx riviere ...`
-
-**Other languages (Java, Python, Go, etc.):**
-```bash
-npm install -g @living-architecture/riviere-cli
-```
-Then use `riviere ...`
 
 ## Usage
 
@@ -477,6 +469,30 @@ riviere builder check-consistency [options]
 riviere builder check-consistency
 riviere builder check-consistency --json
 ```
+
+---
+
+### `define-custom-type`
+
+Define a custom component type
+
+```bash
+riviere builder define-custom-type [options]
+```
+
+**Required:**
+| Flag | Description |
+|------|-------------|
+| `--name <name>` | Custom type name |
+| `--description <desc>` | Custom type description |
+| `--required-property <spec>` | Required property (format: name:type[:description]) |
+| `--optional-property <spec>` | Optional property (format: name:type[:description]) |
+| `--graph <path>` | Custom graph file path (default: .riviere/graph.json) |
+
+**Optional:**
+| Flag | Description |
+|------|-------------|
+| `--json` | Output result as JSON |
 
 ---
 

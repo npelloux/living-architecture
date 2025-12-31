@@ -405,7 +405,7 @@ const useCase = builder.addUseCase({
 
 > **build**(): `RiviereGraph`
 
-Defined in: [packages/riviere-builder/src/builder.ts:829](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L829)
+Defined in: [packages/riviere-builder/src/builder.ts:830](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L830)
 
 Validates and returns the completed graph.
 
@@ -477,7 +477,7 @@ builder.defineCustomType({
 
 > **enrichComponent**(`id`, `enrichment`): `void`
 
-Defined in: [packages/riviere-builder/src/builder.ts:562](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L562)
+Defined in: [packages/riviere-builder/src/builder.ts:563](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L563)
 
 Enriches a DomainOp component with additional domain details.
 
@@ -526,7 +526,7 @@ builder.enrichComponent('orders:fulfillment:domainop:confirm-order', {
 
 > **link**(`input`): `Link`
 
-Defined in: [packages/riviere-builder/src/builder.ts:652](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L652)
+Defined in: [packages/riviere-builder/src/builder.ts:653](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L653)
 
 Creates a link between two components in the graph.
 
@@ -567,7 +567,7 @@ const link = builder.link({
 
 > **linkExternal**(`input`): `ExternalLink`
 
-Defined in: [packages/riviere-builder/src/builder.ts:686](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L686)
+Defined in: [packages/riviere-builder/src/builder.ts:687](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L687)
 
 Creates a link from a component to an external system.
 
@@ -608,7 +608,7 @@ const link = builder.linkExternal({
 
 > **nearMatches**(`query`, `options?`): [`NearMatchResult`](../interfaces/NearMatchResult.md)[]
 
-Defined in: [packages/riviere-builder/src/builder.ts:629](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L629)
+Defined in: [packages/riviere-builder/src/builder.ts:630](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L630)
 
 Finds components similar to a query for error recovery.
 
@@ -648,7 +648,7 @@ const matches = builder.nearMatches({ name: 'Place Ordr' })
 
 > **orphans**(): `string`[]
 
-Defined in: [packages/riviere-builder/src/builder.ts:774](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L774)
+Defined in: [packages/riviere-builder/src/builder.ts:775](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L775)
 
 Returns IDs of components with no incoming or outgoing links.
 
@@ -673,7 +673,7 @@ if (orphans.length > 0) {
 
 > **query**(): `RiviereQuery`
 
-Defined in: [packages/riviere-builder/src/builder.ts:791](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L791)
+Defined in: [packages/riviere-builder/src/builder.ts:792](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L792)
 
 Returns a RiviereQuery instance for the current graph state.
 
@@ -698,7 +698,7 @@ const apis = query.componentsByType('API')
 
 > **save**(`path`): `Promise`\<`void`\>
 
-Defined in: [packages/riviere-builder/src/builder.ts:851](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L851)
+Defined in: [packages/riviere-builder/src/builder.ts:852](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L852)
 
 Validates the graph and writes it to a file.
 
@@ -738,7 +738,7 @@ await builder.save('./output/architecture.json')
 
 > **serialize**(): `string`
 
-Defined in: [packages/riviere-builder/src/builder.ts:809](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L809)
+Defined in: [packages/riviere-builder/src/builder.ts:810](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L810)
 
 Serializes the current graph state as a JSON string.
 
@@ -764,7 +764,7 @@ await fs.writeFile('draft.json', json)
 
 > **stats**(): [`BuilderStats`](../interfaces/BuilderStats.md)
 
-Defined in: [packages/riviere-builder/src/builder.ts:735](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L735)
+Defined in: [packages/riviere-builder/src/builder.ts:736](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L736)
 
 Returns statistics about the current graph state.
 
@@ -788,7 +788,7 @@ console.log(`Links: ${stats.linkCount}`)
 
 > **validate**(): `ValidationResult`
 
-Defined in: [packages/riviere-builder/src/builder.ts:757](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L757)
+Defined in: [packages/riviere-builder/src/builder.ts:758](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L758)
 
 Runs full validation on the graph.
 
@@ -818,7 +818,7 @@ if (!result.valid) {
 
 > **warnings**(): [`BuilderWarning`](../interfaces/BuilderWarning.md)[]
 
-Defined in: [packages/riviere-builder/src/builder.ts:719](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L719)
+Defined in: [packages/riviere-builder/src/builder.ts:720](https://github.com/NTCoding/living-architecture/blob/main/packages/riviere-builder/src/builder.ts#L720)
 
 Returns non-fatal issues found in the graph.
 

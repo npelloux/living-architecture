@@ -535,6 +535,7 @@ export class RiviereBuilder {
       module: input.module,
       sourceLocation: input.sourceLocation,
       ...(input.description !== undefined && { description: input.description }),
+      ...(input.metadata !== undefined && { metadata: input.metadata }),
     }
     return this.registerComponent(component)
   }

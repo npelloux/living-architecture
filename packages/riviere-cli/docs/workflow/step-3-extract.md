@@ -83,11 +83,12 @@ npx riviere builder add-component \
 ```
 
 Type-specific options:
-- API: `--http-method`, `--path`
+- API: `--api-type` (required), `--http-method`, `--http-path`
 - DomainOp: `--entity`, `--operation-name`
 - Event: `--event-name`
 - EventHandler: `--subscribed-events`
 - UI: `--route`
+- Custom: `--custom-type`, `--custom-property` (repeatable, format: `key:value`)
 
 ### 3. Complete Each Type
 

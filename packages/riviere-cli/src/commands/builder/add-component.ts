@@ -43,6 +43,7 @@ interface AddComponentOptions {
   eventName?: string;
   subscribedEvents?: string;
   customType?: string;
+  customProperty?: string[];
   description?: string;
   lineNumber?: string;
   graph?: string;
@@ -55,6 +56,23 @@ interface CommonInput {
   module: string;
   sourceLocation: SourceLocation;
   description?: string;
+}
+
+function parseCustomProperties(properties: string[] | undefined): Record<string, string> | undefined {
+  if (!properties || properties.length === 0) {
+    return undefined;
+  }
+  const metadata: Record<string, string> = {};
+  for (const prop of properties) {
+    const colonIndex = prop.indexOf(':');
+    if (colonIndex === -1) {
+      throw new Error(`Invalid custom property format: ${prop}. Expected 'key:value'`);
+    }
+    const key = prop.slice(0, colonIndex);
+    const value = prop.slice(colonIndex + 1);
+    metadata[key] = value;
+  }
+  return metadata;
 }
 
 function addUIComponent(builder: RiviereBuilder, common: CommonInput, options: AddComponentOptions): string {
@@ -134,7 +152,9 @@ const componentHandlers: Record<ComponentTypeFlag, ComponentHandler> = {
     if (!options.customType) {
       throw new Error('--custom-type is required for Custom component');
     }
-    const component = builder.addCustom({ ...common, customTypeName: options.customType });
+    const metadata = parseCustomProperties(options.customProperty);
+    const input = { ...common, customTypeName: options.customType, ...(metadata !== undefined && { metadata }) };
+    const component = builder.addCustom(input);
     return component.id;
   },
 };
@@ -238,6 +258,7 @@ Examples:
     .option('--event-name <name>', 'Event name')
     .option('--subscribed-events <events>', 'Comma-separated subscribed event names')
     .option('--custom-type <name>', 'Custom type name')
+    .option('--custom-property <key:value>', 'Custom property (repeatable)', (val, acc: string[]) => [...acc, val], [])
     .option('--description <desc>', 'Component description')
     .option('--line-number <n>', 'Source line number')
     .option('--graph <path>', getDefaultGraphPathDescription())
