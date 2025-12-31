@@ -30,6 +30,23 @@ Add additional domains if needed:
 npx riviere builder add-domain --name "[name]" --system-type "[domain|bff|ui|other]" --description "[desc]"
 ```
 
+Define custom types (for accepted proposals in component-definitions.md):
+```bash
+npx riviere builder define-custom-type \
+  --name "[CustomTypeName]" \
+  --description "[description]" \
+  --required-property "propertyName:type:description" \
+  --optional-property "propertyName:type:description"
+```
+
+Example (BackgroundJob with schedule property):
+```bash
+npx riviere builder define-custom-type \
+  --name "BackgroundJob" \
+  --description "Scheduled background task running on an interval" \
+  --required-property "schedule:string:Cron expression or interval"
+```
+
 ## Extract Components
 
 **No planning or counting. Extract directly using patterns from Step 2.**
