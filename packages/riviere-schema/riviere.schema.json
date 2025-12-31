@@ -278,7 +278,7 @@
         "sourceLocation": { "$ref": "#/definitions/sourceLocation" },
         "customTypeName": { "type": "string", "description": "Name of the custom type (must match a key in metadata.customTypes)", "minLength": 1 }
       },
-      "additionalProperties": false
+      "additionalProperties": true
     },
     "link": {
       "type": "object",

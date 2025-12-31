@@ -1,11 +1,6 @@
 import { Handle, Position } from '@xyflow/react'
 import type { NodeProps, Node } from '@xyflow/react'
-
-interface DomainNodeData extends Record<string, unknown> {
-  label: string
-  nodeCount: number
-  dimmed?: boolean
-}
+import type { DomainNodeData } from '../../extractDomainMap'
 
 type DomainNodeProps = NodeProps<Node<DomainNodeData>>
 
@@ -20,6 +15,12 @@ export function DomainNode(props: DomainNodeProps): React.ReactElement {
   const opacity = data.dimmed === true ? 0.3 : 1
   const fontSize = data.label.length > 10 ? 11 : 13
   const displayLabel = truncateLabel(data.label, 12)
+  const isExternal = data.isExternal === true
+
+  const baseClasses = 'flex items-center justify-center rounded-full border-2 text-center shadow-lg transition-all hover:shadow-xl'
+  const internalClasses = 'border-[var(--primary)] bg-[var(--bg-secondary)]'
+  const externalClasses = 'domain-node-external'
+  const nodeClasses = `${baseClasses} ${isExternal ? externalClasses : internalClasses}`
 
   return (
     <>
@@ -32,16 +33,28 @@ export function DomainNode(props: DomainNodeProps): React.ReactElement {
       <Handle id="left-source" type="source" position={Position.Left} className="invisible" />
       <Handle id="right-source" type="source" position={Position.Right} className="invisible" />
       <div
-        className="flex items-center justify-center rounded-full border-2 border-[var(--primary)] bg-[var(--bg-secondary)] text-center shadow-lg transition-all hover:shadow-xl"
+        className={nodeClasses}
         style={{ width: size, height: size, opacity }}
         title={data.label}
       >
-        <span
-          className="max-w-full overflow-hidden px-2 font-semibold text-[var(--text-primary)]"
-          style={{ fontSize }}
-        >
-          {displayLabel}
-        </span>
+        {isExternal ? (
+          <div className="flex flex-col items-center gap-1">
+            <i className="ph ph-arrow-square-out domain-node-external-icon" aria-hidden="true" />
+            <span
+              className="max-w-full overflow-hidden px-1 font-semibold text-[var(--text-primary)]"
+              style={{ fontSize: fontSize - 2 }}
+            >
+              {displayLabel}
+            </span>
+          </div>
+        ) : (
+          <span
+            className="max-w-full overflow-hidden px-2 font-semibold text-[var(--text-primary)]"
+            style={{ fontSize }}
+          >
+            {displayLabel}
+          </span>
+        )}
       </div>
     </>
   )

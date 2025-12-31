@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { extractDomainMapData, getConnectedDomains } from './extractDomainMapData'
-import type { DomainEdge } from './extractDomainMapData'
+import { extractDomainMap, getConnectedDomains } from './extractDomainMap'
+import type { DomainEdge } from './extractDomainMap'
 import type { RiviereGraph } from '@/types/riviere'
 import { parseNode, parseEdge, parseDomainMetadata } from '@/lib/riviereTestData'
 
@@ -18,12 +18,12 @@ function createMinimalGraph(overrides: Partial<RiviereGraph> = {}): RiviereGraph
   }
 }
 
-describe('extractDomainMapData', () => {
+describe('extractDomainMap', () => {
   describe('domain node extraction', () => {
     it('returns empty arrays when graph has no nodes', () => {
       const graph = createMinimalGraph()
 
-      const result = extractDomainMapData(graph)
+      const result = extractDomainMap(graph)
 
       expect(result.domainNodes).toEqual([])
       expect(result.domainEdges).toEqual([])
@@ -38,7 +38,7 @@ describe('extractDomainMapData', () => {
         ],
       })
 
-      const result = extractDomainMapData(graph)
+      const result = extractDomainMap(graph)
 
       expect(result.domainNodes).toHaveLength(2)
       expect(result.domainNodes.map((d) => d.id).sort()).toEqual(['orders', 'payments'])
@@ -54,7 +54,7 @@ describe('extractDomainMapData', () => {
         ],
       })
 
-      const result = extractDomainMapData(graph)
+      const result = extractDomainMap(graph)
 
       const ordersNode = result.domainNodes.find((d) => d.id === 'orders')
       const paymentsNode = result.domainNodes.find((d) => d.id === 'payments')
@@ -70,7 +70,7 @@ describe('extractDomainMapData', () => {
         ],
       })
 
-      const result = extractDomainMapData(graph)
+      const result = extractDomainMap(graph)
 
       expect(result.domainNodes[0]?.data.label).toBe('orders')
     })
@@ -86,7 +86,7 @@ describe('extractDomainMapData', () => {
         links: [parseEdge({ source: 'n1', target: 'n2', type: 'sync' })],
       })
 
-      const result = extractDomainMapData(graph)
+      const result = extractDomainMap(graph)
 
       expect(result.domainEdges).toHaveLength(1)
       expect(result.domainEdges[0]?.source).toBe('orders')
@@ -102,7 +102,7 @@ describe('extractDomainMapData', () => {
         links: [parseEdge({ source: 'n1', target: 'n2', type: 'sync' })],
       })
 
-      const result = extractDomainMapData(graph)
+      const result = extractDomainMap(graph)
 
       expect(result.domainEdges).toEqual([])
     })
@@ -120,7 +120,7 @@ describe('extractDomainMapData', () => {
         ],
       })
 
-      const result = extractDomainMapData(graph)
+      const result = extractDomainMap(graph)
 
       expect(result.domainEdges).toHaveLength(1)
       expect(result.domainEdges[0]?.data?.apiCount).toBe(2)
@@ -136,7 +136,7 @@ describe('extractDomainMapData', () => {
         links: [parseEdge({ source: 'n1', target: 'n2', type: 'async' })],
       })
 
-      const result = extractDomainMapData(graph)
+      const result = extractDomainMap(graph)
 
       expect(result.domainEdges[0]?.data?.eventCount).toBe(1)
       expect(result.domainEdges[0]?.data?.apiCount).toBe(0)
@@ -151,7 +151,7 @@ describe('extractDomainMapData', () => {
         links: [parseEdge({ source: 'n1', target: 'n2' })],
       })
 
-      const result = extractDomainMapData(graph)
+      const result = extractDomainMap(graph)
 
       expect(result.domainEdges).toHaveLength(1)
       expect(result.domainEdges[0]?.data?.connections[0]?.type).toBe('unknown')

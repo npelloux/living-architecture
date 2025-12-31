@@ -93,4 +93,28 @@ describe('DomainMapPage', () => {
     expect(ordersNode).toBeInTheDocument()
     expect(paymentsNode).toBeInTheDocument()
   })
+
+  describe('inspector panel design', () => {
+    it('renders inspector panel with Phosphor close icon', () => {
+      const graph = createTestGraph()
+
+      const { container } = renderWithRouter(graph)
+
+      const inspector = container.querySelector('[data-testid="domain-map-inspector"]')
+      expect(inspector).toBeInTheDocument()
+
+      const closeIcon = inspector?.querySelector('i.ph-x')
+      expect(closeIcon).toBeInTheDocument()
+    })
+
+    it('renders inspector panel with header icon', () => {
+      const graph = createTestGraph()
+
+      const { container } = renderWithRouter(graph)
+
+      const inspector = container.querySelector('[data-testid="domain-map-inspector"]')
+      const headerIcon = inspector?.querySelector('i.ph-plugs-connected')
+      expect(headerIcon).toBeInTheDocument()
+    })
+  })
 })

@@ -20,7 +20,7 @@ function formatEdgeLabel(apiCount: number, eventCount: number): string | undefin
   return undefined
 }
 
-export interface DomainNodeData extends Record<string, unknown> {
+export interface DomainNodeData {
   label: string
   nodeCount: number
   dimmed?: boolean
@@ -34,7 +34,7 @@ export interface ConnectionDetail {
   targetNodeType: string
 }
 
-export interface DomainEdgeData extends Record<string, unknown> {
+export interface DomainEdgeData {
   apiCount: number
   eventCount: number
   connections: ConnectionDetail[]
@@ -196,7 +196,7 @@ function createExternalNodeId(name: string): string {
   return `external:${name}`
 }
 
-export function extractDomainMapData(graph: RiviereGraph): DomainMapData {
+export function extractDomainMap(graph: RiviereGraph): DomainMapData {
   const query = new RiviereQuery(graph)
   const externalDomains = query.externalDomains()
 

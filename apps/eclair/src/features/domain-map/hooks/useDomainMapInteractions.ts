@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
-import type { ConnectionDetail } from '../extractDomainMapData'
+import type { ConnectionDetail } from '../extractDomainMap'
+import { pluralizeComponent, pluralizeConnection } from '../pluralize'
 
 interface TooltipState {
   visible: boolean
@@ -29,6 +30,7 @@ interface UseDomainMapInteractionsResult {
   inspector: InspectorState
   focusedDomain: string | null
   showNodeTooltip: (x: number, y: number, label: string, nodeCount: number) => void
+  showExternalNodeTooltip: (x: number, y: number, label: string, connectionCount: number) => void
   showEdgeTooltip: (x: number, y: number, source: string, target: string, apiCount: number, eventCount: number) => void
   hideTooltip: () => void
   selectEdge: (source: string, target: string, apiCount: number, eventCount: number, sourceNodeCount: number, targetNodeCount: number, connections: ConnectionDetail[]) => void
@@ -70,7 +72,17 @@ export function useDomainMapInteractions(options: UseDomainMapInteractionsOption
       x: x + TOOLTIP_OFFSET_X,
       y: y + TOOLTIP_OFFSET_Y,
       title: label,
-      detail: `${nodeCount} component${nodeCount !== 1 ? 's' : ''}`,
+      detail: pluralizeComponent(nodeCount),
+    })
+  }, [])
+
+  const showExternalNodeTooltip = useCallback((x: number, y: number, label: string, connectionCount: number) => {
+    setTooltip({
+      visible: true,
+      x: x + TOOLTIP_OFFSET_X,
+      y: y + TOOLTIP_OFFSET_Y,
+      title: label,
+      detail: `External System · ${pluralizeConnection(connectionCount)}`,
     })
   }, [])
 
@@ -81,7 +93,7 @@ export function useDomainMapInteractions(options: UseDomainMapInteractionsOption
       x: x + TOOLTIP_OFFSET_X,
       y: y + TOOLTIP_OFFSET_Y,
       title: `${source} → ${target}`,
-      detail: `${total} connection${total !== 1 ? 's' : ''} · Click for details`,
+      detail: `${pluralizeConnection(total)} · Click for details`,
     })
   }, [])
 
@@ -120,6 +132,7 @@ export function useDomainMapInteractions(options: UseDomainMapInteractionsOption
     inspector,
     focusedDomain,
     showNodeTooltip,
+    showExternalNodeTooltip,
     showEdgeTooltip,
     hideTooltip,
     selectEdge,

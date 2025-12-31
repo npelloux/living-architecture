@@ -11,8 +11,10 @@ import {
   exportSvgAsFile,
   UNNAMED_GRAPH_EXPORT_NAME,
 } from '@/lib/exportGraph'
-import { extractDomainMapData, getConnectedDomains } from './extractDomainMapData'
-import type { DomainNodeData, DomainEdgeData } from './extractDomainMapData'
+import { extractDomainMap, getConnectedDomains } from './extractDomainMap'
+import { calculateTooltipPositionWithViewportClipping } from './calculateTooltipPosition'
+import { pluralizeConnection } from './pluralize'
+import type { DomainNodeData, DomainEdgeData } from './extractDomainMap'
 import { DomainNode } from './components/DomainNode/DomainNode'
 import { useDomainMapInteractions } from './hooks/useDomainMapInteractions'
 
@@ -29,7 +31,7 @@ export function DomainMapPage({ graph }: DomainMapPageProps): React.ReactElement
   const exportContainerRef = useRef<HTMLDivElement>(null)
   const highlightDomain = searchParams.get('highlight')
 
-  const { domainNodes: initialNodes, domainEdges: initialEdges } = useMemo(() => extractDomainMapData(graph), [graph])
+  const { domainNodes: initialNodes, domainEdges: initialEdges } = useMemo(() => extractDomainMap(graph), [graph])
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<DomainNodeData>>(initialNodes)
   const [edges, setEdges] = useEdgesState<Edge<DomainEdgeData>>(initialEdges)
 
@@ -38,7 +40,7 @@ export function DomainMapPage({ graph }: DomainMapPageProps): React.ReactElement
     setEdges(initialEdges)
   }, [initialNodes, initialEdges, setNodes, setEdges])
 
-  const connectionText = initialEdges.length === 1 ? '1 connection' : `${initialEdges.length} connections`
+  const connectionText = pluralizeConnection(initialEdges.length)
 
   const nodeCountMap = useMemo(() => {
     const map = new Map<string, number>()
@@ -53,6 +55,7 @@ export function DomainMapPage({ graph }: DomainMapPageProps): React.ReactElement
     inspector,
     focusedDomain,
     showNodeTooltip,
+    showExternalNodeTooltip,
     showEdgeTooltip,
     hideTooltip,
     selectEdge,
@@ -61,8 +64,12 @@ export function DomainMapPage({ graph }: DomainMapPageProps): React.ReactElement
   } = useDomainMapInteractions({ initialFocusedDomain: highlightDomain })
 
   const onNodeMouseEnter: NodeMouseHandler<Node<DomainNodeData>> = useCallback((event, node) => {
-    showNodeTooltip(event.clientX, event.clientY, node.data.label, node.data.nodeCount)
-  }, [showNodeTooltip])
+    if (node.data.isExternal === true) {
+      showExternalNodeTooltip(event.clientX, event.clientY, node.data.label, node.data.nodeCount)
+    } else {
+      showNodeTooltip(event.clientX, event.clientY, node.data.label, node.data.nodeCount)
+    }
+  }, [showNodeTooltip, showExternalNodeTooltip])
 
   const onNodeMouseLeave = useCallback(() => {
     hideTooltip()
@@ -103,6 +110,9 @@ export function DomainMapPage({ graph }: DomainMapPageProps): React.ReactElement
   }, [selectEdge, nodeCountMap])
 
   const onNodeClick: NodeMouseHandler<Node<DomainNodeData>> = useCallback((_event, node) => {
+    if (node.data.isExternal === true) {
+      return
+    }
     navigate(`/domains/${node.id}`)
   }, [navigate])
 
@@ -115,7 +125,7 @@ export function DomainMapPage({ graph }: DomainMapPageProps): React.ReactElement
     if (focusedDomain === null) return nodes
     return nodes.map((node) => {
       const isFocused = node.id === focusedDomain
-      const isConnected = connectedDomains?.has(node.id) ?? false
+      const isConnected = connectedDomains === null ? false : connectedDomains.has(node.id)
       const isDimmed = !isFocused && !isConnected
       return {
         ...node,
@@ -152,10 +162,11 @@ export function DomainMapPage({ graph }: DomainMapPageProps): React.ReactElement
 
     const handleExportSvg = (): void => {
       const svg = exportContainerRef.current?.querySelector('svg')
-      if (svg instanceof SVGSVGElement) {
-        const filename = generateExportFilename(graphName, 'svg')
-        exportSvgAsFile(svg, filename)
+      if (!(svg instanceof SVGSVGElement)) {
+        throw new Error('Export container must contain an SVG element')
       }
+      const filename = generateExportFilename(graphName, 'svg')
+      exportSvgAsFile(svg, filename)
     }
 
     registerExportHandlers({ onPng: handleExportPng, onSvg: handleExportSvg })
@@ -221,71 +232,65 @@ export function DomainMapPage({ graph }: DomainMapPageProps): React.ReactElement
         </div>
       </div>
 
-      {tooltip.visible && (
-        <div
-          data-testid="domain-map-tooltip"
-          className="pointer-events-none fixed z-50 rounded-md border border-[var(--border-primary)] bg-[var(--bg-primary)] px-3 py-2 shadow-lg"
-          style={{ left: tooltip.x, top: tooltip.y }}
-        >
-          <div className="text-sm font-semibold text-[var(--text-primary)]">{tooltip.title}</div>
-          <div className="text-xs text-[var(--text-secondary)]">{tooltip.detail}</div>
-        </div>
-      )}
+      {tooltip.visible && (() => {
+        const { left, top } = calculateTooltipPositionWithViewportClipping(tooltip.x, tooltip.y)
+        return (
+          <div
+            data-testid="domain-map-tooltip"
+            className="pointer-events-none fixed z-50 rounded-md border border-[var(--border-primary)] bg-[var(--bg-primary)] px-3 py-2 shadow-lg"
+            style={{ left, top }}
+          >
+            <div className="text-sm font-semibold text-[var(--text-primary)]">{tooltip.title}</div>
+            <div className="text-xs text-[var(--text-secondary)]">{tooltip.detail}</div>
+          </div>
+        )
+      })()}
 
       <div
         data-testid="domain-map-inspector"
-        className={`absolute right-0 top-0 h-full border-l border-[var(--border-primary)] bg-[var(--bg-primary)] transition-all duration-200 ${
-          inspector.visible ? 'w-full md:w-80' : 'w-0 overflow-hidden'
-        }`}
+        className={`inspector-panel ${inspector.visible ? 'inspector-panel-expanded' : 'inspector-panel-collapsed'}`}
       >
-        <div className="flex items-center justify-between border-b border-[var(--border-primary)] p-4">
-          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Integration Details</h2>
+        <div className="inspector-header">
+          <div className="inspector-title">
+            <i className="ph ph-plugs-connected" aria-hidden="true" />
+            <span>Integration Details</span>
+          </div>
           <button
             onClick={closeInspector}
-            className="flex h-7 w-7 items-center justify-center rounded text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--text-primary)]"
+            className="inspector-close"
             aria-label="Close inspector"
           >
-            ×
+            <i className="ph ph-x" aria-hidden="true" />
           </button>
         </div>
 
-        <div className="space-y-5 p-5">
-          <div>
-            <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">
-              Integration
-            </div>
-            <div className="text-sm text-[var(--text-primary)]">
-              <span className="font-semibold">{inspector.source}</span>
+        <div className="inspector-body">
+          <div className="inspector-section">
+            <div className="inspector-section-title">Integration</div>
+            <div className="inspector-integration-flow">
+              <span className="inspector-integration-flow-domain">{inspector.source}</span>
               {' → '}
-              <span className="font-semibold">{inspector.target}</span>
+              <span className="inspector-integration-flow-domain">{inspector.target}</span>
             </div>
           </div>
 
-          <div>
-            <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">
-              Total Connections
-            </div>
-            <div className="text-sm text-[var(--text-primary)]">{totalConnections}</div>
+          <div className="inspector-section">
+            <div className="inspector-section-title">Total Connections</div>
+            <div className="inspector-stat-value">{totalConnections}</div>
           </div>
 
-          <div>
-            <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">
-              Connections
-            </div>
-            <div className="max-h-64 space-y-2 overflow-y-auto">
+          <div className="inspector-section">
+            <div className="inspector-section-title">Connections</div>
+            <div className="inspector-connection-list">
               {inspector.connections.map((conn, index) => {
                 const isEvent = conn.targetNodeType === 'EventHandler'
                 return (
                   <div
                     key={`${conn.sourceName}-${conn.targetName}-${index}`}
-                    className="rounded-md border border-[var(--border-primary)] bg-[var(--surface-secondary)] p-3"
+                    className="inspector-connection-item"
                   >
                     <div className="flex items-center gap-2">
-                      <span
-                        className={`rounded px-2 py-0.5 text-xs font-semibold ${
-                          isEvent ? 'bg-amber-100 text-amber-700' : 'bg-cyan-100 text-cyan-700'
-                        }`}
-                      >
+                      <span className={isEvent ? 'badge-integration-event' : 'badge-integration-api'}>
                         {isEvent ? 'EVENT' : 'API'}
                       </span>
                     </div>
@@ -301,20 +306,16 @@ export function DomainMapPage({ graph }: DomainMapPageProps): React.ReactElement
             </div>
           </div>
 
-          <div>
-            <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">
-              Source Domain
-            </div>
-            <div className="text-sm text-[var(--text-primary)]">{inspector.source}</div>
-            <div className="text-xs text-[var(--text-secondary)]">{inspector.sourceNodeCount} components</div>
+          <div className="inspector-section">
+            <div className="inspector-section-title">Source Domain</div>
+            <div className="inspector-domain-info">{inspector.source}</div>
+            <div className="inspector-domain-meta">{inspector.sourceNodeCount} components</div>
           </div>
 
-          <div>
-            <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">
-              Target Domain
-            </div>
-            <div className="text-sm text-[var(--text-primary)]">{inspector.target}</div>
-            <div className="text-xs text-[var(--text-secondary)]">{inspector.targetNodeCount} components</div>
+          <div className="inspector-section">
+            <div className="inspector-section-title">Target Domain</div>
+            <div className="inspector-domain-info">{inspector.target}</div>
+            <div className="inspector-domain-meta">{inspector.targetNodeCount} components</div>
           </div>
         </div>
       </div>

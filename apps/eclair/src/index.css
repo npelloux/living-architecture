@@ -1403,4 +1403,213 @@
     font-weight: 600;
     color: var(--text-primary);
   }
+
+  /* Domain Map - External Node Styling */
+  .domain-node-external {
+    border-style: dashed !important;
+    border-color: #64748B !important;
+    background: linear-gradient(135deg, rgba(100, 116, 139, 0.1) 0%, rgba(148, 163, 184, 0.1) 100%) !important;
+  }
+
+  .theme-voltage .domain-node-external {
+    border-color: #94A3B8 !important;
+    background: linear-gradient(135deg, rgba(100, 116, 139, 0.2) 0%, rgba(148, 163, 184, 0.2) 100%) !important;
+  }
+
+  .domain-node-external-icon {
+    font-size: 14px;
+    color: #64748B;
+  }
+
+  .theme-voltage .domain-node-external-icon {
+    color: #94A3B8;
+  }
+
+  /* Domain Map - Integration Badges (theme-aware) */
+  .badge-integration-api {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    padding: 0 8px;
+    border-radius: calc(var(--radius) / 2);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: rgba(13, 148, 136, 0.15);
+    color: #0D9488;
+  }
+
+  .badge-integration-event {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    padding: 0 8px;
+    border-radius: calc(var(--radius) / 2);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: rgba(245, 158, 11, 0.15);
+    color: #D97706;
+  }
+
+  .theme-voltage .badge-integration-api {
+    background: rgba(6, 182, 212, 0.2);
+    color: #06B6D4;
+  }
+
+  .theme-voltage .badge-integration-event {
+    background: rgba(245, 158, 11, 0.2);
+    color: #FBBF24;
+  }
+
+  .theme-circuit .badge-integration-api {
+    background: rgba(9, 105, 218, 0.1);
+    color: #0969DA;
+  }
+
+  .theme-circuit .badge-integration-event {
+    background: rgba(212, 118, 22, 0.1);
+    color: #BF8700;
+  }
+
+  /* Domain Map - Inspector Panel */
+  .inspector-panel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    background: var(--bg-primary);
+    border-left: 1px solid var(--border-color);
+    transition: width 0.2s ease;
+    overflow: hidden;
+  }
+
+  .inspector-panel-collapsed {
+    width: 0;
+  }
+
+  .inspector-panel-expanded {
+    width: 100%;
+  }
+
+  @media (min-width: 768px) {
+    .inspector-panel-expanded {
+      width: 320px;
+    }
+  }
+
+  .inspector-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .inspector-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .inspector-title i {
+    font-size: 18px;
+    color: var(--primary);
+  }
+
+  .inspector-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    border-radius: calc(var(--radius) / 2);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .inspector-close:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+
+  .inspector-close i {
+    font-size: 18px;
+  }
+
+  .inspector-body {
+    padding: 20px;
+    overflow-y: auto;
+    max-height: calc(100% - 57px);
+  }
+
+  .inspector-section {
+    margin-bottom: 20px;
+  }
+
+  .inspector-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .inspector-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-tertiary);
+    margin-bottom: 10px;
+  }
+
+  .inspector-connection-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 256px;
+    overflow-y: auto;
+  }
+
+  .inspector-connection-item {
+    padding: 12px;
+    background: var(--bg-tertiary);
+    border-radius: calc(var(--radius) / 2);
+  }
+
+  .inspector-integration-flow {
+    font-size: 14px;
+    color: var(--text-primary);
+  }
+
+  .inspector-integration-flow-domain {
+    font-weight: 600;
+  }
+
+  .inspector-stat-value {
+    font-size: 14px;
+    color: var(--text-primary);
+  }
+
+  .inspector-domain-info {
+    font-size: 14px;
+    color: var(--text-primary);
+  }
+
+  .inspector-domain-meta {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
 }

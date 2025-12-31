@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { extractDomainMapData } from './extractDomainMapData'
+import { extractDomainMap } from './extractDomainMap'
 import type { RiviereGraph } from '@/types/riviere'
 import { parseNode, parseEdge, parseDomainMetadata } from '@/lib/riviereTestData'
 
@@ -17,7 +17,7 @@ function createMinimalGraph(overrides: Partial<RiviereGraph> = {}): RiviereGraph
   }
 }
 
-describe('extractDomainMapData React Flow compatibility', () => {
+describe('extractDomainMap React Flow compatibility', () => {
   it('domain nodes have position property', () => {
     const graph = createMinimalGraph({
       components: [
@@ -25,7 +25,7 @@ describe('extractDomainMapData React Flow compatibility', () => {
       ],
     })
 
-    const result = extractDomainMapData(graph)
+    const result = extractDomainMap(graph)
 
     expect(result.domainNodes[0]?.position).toBeDefined()
     expect(typeof result.domainNodes[0]?.position.x).toBe('number')
@@ -41,7 +41,7 @@ describe('extractDomainMapData React Flow compatibility', () => {
       ],
     })
 
-    const result = extractDomainMapData(graph)
+    const result = extractDomainMap(graph)
 
     const positions = result.domainNodes.map((n) => `${n.position.x},${n.position.y}`)
     const uniquePositions = new Set(positions)
@@ -58,7 +58,7 @@ describe('extractDomainMapData React Flow compatibility', () => {
       ],
     })
 
-    const result = extractDomainMapData(graph)
+    const result = extractDomainMap(graph)
 
     const hasVaryingY = result.domainNodes.some((n) => n.position.y !== 0)
     expect(hasVaryingY).toBe(true)
@@ -71,7 +71,7 @@ describe('extractDomainMapData React Flow compatibility', () => {
       ],
     })
 
-    const result = extractDomainMapData(graph)
+    const result = extractDomainMap(graph)
 
     expect(result.domainNodes[0]?.type).toBe('domain')
   })
@@ -85,7 +85,7 @@ describe('extractDomainMapData React Flow compatibility', () => {
       links: [parseEdge({ source: 'n1', target: 'n2', type: 'sync' })],
     })
 
-    const result = extractDomainMapData(graph)
+    const result = extractDomainMap(graph)
 
     expect(result.domainEdges[0]?.sourceHandle).toBeDefined()
     expect(result.domainEdges[0]?.targetHandle).toBeDefined()
@@ -108,7 +108,7 @@ describe('extractDomainMapData React Flow compatibility', () => {
       ],
     })
 
-    const result = extractDomainMapData(graph)
+    const result = extractDomainMap(graph)
 
     expect(result.domainEdges).toHaveLength(1)
     expect(result.domainEdges[0]?.data?.apiCount).toBe(2)
@@ -127,7 +127,7 @@ describe('extractDomainMapData React Flow compatibility', () => {
       ],
     })
 
-    const result = extractDomainMapData(graph)
+    const result = extractDomainMap(graph)
 
     const ids = result.domainEdges.map((e) => e.id)
     expect(new Set(ids).size).toBe(ids.length)
@@ -142,7 +142,7 @@ describe('extractDomainMapData React Flow compatibility', () => {
       links: [parseEdge({ source: 'n1', target: 'n2', type: 'sync' })],
     })
 
-    const result = extractDomainMapData(graph)
+    const result = extractDomainMap(graph)
 
     expect(result.domainEdges[0]?.label).toBe('1 API')
   })
@@ -156,7 +156,7 @@ describe('extractDomainMapData React Flow compatibility', () => {
       links: [parseEdge({ source: 'n1', target: 'n2', type: 'async' })],
     })
 
-    const result = extractDomainMapData(graph)
+    const result = extractDomainMap(graph)
 
     expect(result.domainEdges[0]?.label).toBe('1 Event')
   })
@@ -174,7 +174,7 @@ describe('extractDomainMapData React Flow compatibility', () => {
       ],
     })
 
-    const result = extractDomainMapData(graph)
+    const result = extractDomainMap(graph)
 
     expect(result.domainEdges[0]?.label).toBe('1 API · 1 Event')
   })
@@ -188,7 +188,7 @@ describe('extractDomainMapData React Flow compatibility', () => {
       links: [parseEdge({ source: 'n1', target: 'n2', type: 'sync' })],
     })
 
-    const result = extractDomainMapData(graph)
+    const result = extractDomainMap(graph)
 
     expect(result.domainEdges[0]?.style?.stroke).toBe('#06B6D4')
     expect(result.domainEdges[0]?.markerEnd).toBe('url(#arrow-cyan)')
@@ -203,7 +203,7 @@ describe('extractDomainMapData React Flow compatibility', () => {
       links: [parseEdge({ source: 'n1', target: 'n2', type: 'async' })],
     })
 
-    const result = extractDomainMapData(graph)
+    const result = extractDomainMap(graph)
 
     expect(result.domainEdges[0]?.style?.stroke).toBe('#F59E0B')
     expect(result.domainEdges[0]?.markerEnd).toBe('url(#arrow-amber)')
@@ -222,7 +222,7 @@ describe('extractDomainMapData React Flow compatibility', () => {
       ],
     })
 
-    const result = extractDomainMapData(graph)
+    const result = extractDomainMap(graph)
 
     expect(result.domainEdges[0]?.style?.stroke).toBe('#06B6D4')
   })
@@ -236,7 +236,7 @@ describe('extractDomainMapData React Flow compatibility', () => {
       links: [parseEdge({ source: 'n1', target: 'n2', type: 'sync' })],
     })
 
-    const result = extractDomainMapData(graph)
+    const result = extractDomainMap(graph)
 
     expect(result.domainEdges[0]?.data?.connections).toEqual([
       { sourceName: 'PlaceOrder', targetName: 'ProcessPayment', type: 'sync', targetNodeType: 'UseCase' },
@@ -257,7 +257,7 @@ describe('extractDomainMapData React Flow compatibility', () => {
       ],
     })
 
-    const result = extractDomainMapData(graph)
+    const result = extractDomainMap(graph)
 
     expect(result.domainEdges[0]?.data?.connections).toHaveLength(2)
     expect(result.domainEdges[0]?.data?.connections).toContainEqual({

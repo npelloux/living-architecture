@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useDomainMapInteractions } from './useDomainMapInteractions'
-import type { ConnectionDetail } from '../extractDomainMapData'
+import type { ConnectionDetail } from '../extractDomainMap'
 
 describe('useDomainMapInteractions', () => {
   describe('tooltip', () => {
@@ -72,6 +72,28 @@ describe('useDomainMapInteractions', () => {
 
       expect(result.current.tooltip.x).toBe(114)
       expect(result.current.tooltip.y).toBe(186)
+    })
+
+    it('shows tooltip with external system data', () => {
+      const { result } = renderHook(() => useDomainMapInteractions())
+
+      act(() => {
+        result.current.showExternalNodeTooltip(100, 200, 'Stripe', 3)
+      })
+
+      expect(result.current.tooltip.visible).toBe(true)
+      expect(result.current.tooltip.title).toBe('Stripe')
+      expect(result.current.tooltip.detail).toBe('External System · 3 connections')
+    })
+
+    it('uses singular connection for external system with count of 1', () => {
+      const { result } = renderHook(() => useDomainMapInteractions())
+
+      act(() => {
+        result.current.showExternalNodeTooltip(100, 200, 'Stripe', 1)
+      })
+
+      expect(result.current.tooltip.detail).toBe('External System · 1 connection')
     })
   })
 

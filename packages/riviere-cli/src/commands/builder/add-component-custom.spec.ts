@@ -9,7 +9,7 @@ describe('riviere builder add-component Custom type', () => {
   const ctx: TestContext = createTestContext();
   setupCommandTest(ctx);
 
-  it('stores metadata when --custom-property provided for Custom component', async () => {
+  it('stores custom properties directly on component when --custom-property provided', async () => {
     await createGraphWithCustomType(ctx.testDir, 'orders', 'BackgroundJob', {
       description: 'Scheduled background task',
       requiredProperties: { schedule: { type: 'string', description: 'Cron expression' } },
@@ -48,7 +48,7 @@ describe('riviere builder add-component Custom type', () => {
           type: 'Custom',
           customTypeName: 'BackgroundJob',
           name: 'Order Cleanup',
-          metadata: { schedule: '0 0 * * *' },
+          schedule: '0 0 * * *',
         },
       ],
     });
@@ -90,7 +90,7 @@ describe('riviere builder add-component Custom type', () => {
     const content = await readFile(graphPath, 'utf-8');
     const graph: unknown = JSON.parse(content);
     expect(graph).toMatchObject({
-      components: [{ metadata: { schedule: '0 0 * * *', timeout: '5m' } }],
+      components: [{ schedule: '0 0 * * *', timeout: '5m' }],
     });
   });
 

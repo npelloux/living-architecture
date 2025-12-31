@@ -61,4 +61,42 @@ describe('DomainNode', () => {
     const nodeDiv = container.querySelector('div.flex')
     expect(nodeDiv).toHaveStyle({ opacity: '0.3' })
   })
+
+  describe('external domain styling', () => {
+    it('applies external styling class when isExternal is true', () => {
+      const { container } = renderWithProvider(
+        <DomainNode data={{ label: 'Stripe', nodeCount: 3, isExternal: true }} />
+      )
+
+      const nodeDiv = container.querySelector('div.flex')
+      expect(nodeDiv).toHaveClass('domain-node-external')
+    })
+
+    it('renders arrow-square-out icon for external nodes', () => {
+      const { container } = renderWithProvider(
+        <DomainNode data={{ label: 'Stripe', nodeCount: 3, isExternal: true }} />
+      )
+
+      const icon = container.querySelector('i.ph-arrow-square-out')
+      expect(icon).toBeInTheDocument()
+    })
+
+    it('does not apply external styling for internal nodes', () => {
+      const { container } = renderWithProvider(
+        <DomainNode data={{ label: 'orders', nodeCount: 5, isExternal: false }} />
+      )
+
+      const nodeDiv = container.querySelector('div.flex')
+      expect(nodeDiv).not.toHaveClass('domain-node-external')
+    })
+
+    it('does not render icon for internal nodes', () => {
+      const { container } = renderWithProvider(
+        <DomainNode data={{ label: 'orders', nodeCount: 5 }} />
+      )
+
+      const icon = container.querySelector('i.ph-arrow-square-out')
+      expect(icon).not.toBeInTheDocument()
+    })
+  })
 })

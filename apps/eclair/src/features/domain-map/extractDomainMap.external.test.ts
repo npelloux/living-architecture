@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { extractDomainMapData } from './extractDomainMapData'
+import { extractDomainMap } from './extractDomainMap'
 import type { RiviereGraph } from '@/types/riviere'
 import { parseNode, parseDomainMetadata } from '@/lib/riviereTestData'
 
@@ -17,7 +17,7 @@ function createMinimalGraph(overrides: Partial<RiviereGraph> = {}): RiviereGraph
   }
 }
 
-describe('extractDomainMapData external links integration', () => {
+describe('extractDomainMap external links integration', () => {
   it('creates individual node for each external system', () => {
     const sourceNodeId = parseNode({
       sourceLocation: testSourceLocation,
@@ -45,7 +45,7 @@ describe('extractDomainMapData external links integration', () => {
       ],
     })
 
-    const result = extractDomainMapData(graph)
+    const result = extractDomainMap(graph)
 
     const stripeNode = result.domainNodes.find((n) => n.id === 'external:Stripe')
     const twilioNode = result.domainNodes.find((n) => n.id === 'external:Twilio')
@@ -71,7 +71,7 @@ describe('extractDomainMapData external links integration', () => {
       ],
     })
 
-    const result = extractDomainMapData(graph)
+    const result = extractDomainMap(graph)
 
     const externalNodes = result.domainNodes.filter((n) => n.id.startsWith('external:'))
     expect(externalNodes).toHaveLength(0)
@@ -103,7 +103,7 @@ describe('extractDomainMapData external links integration', () => {
       ],
     })
 
-    const result = extractDomainMapData(graph)
+    const result = extractDomainMap(graph)
 
     const stripeEdge = result.domainEdges.find((e) => e.target === 'external:Stripe')
     expect(stripeEdge).toBeDefined()
@@ -139,7 +139,7 @@ describe('extractDomainMapData external links integration', () => {
       ],
     })
 
-    const result = extractDomainMapData(graph)
+    const result = extractDomainMap(graph)
 
     const stripeNode = result.domainNodes.find((n) => n.id === 'external:Stripe')
     expect(stripeNode?.data.nodeCount).toBe(2)
@@ -152,7 +152,7 @@ describe('extractDomainMapData external links integration', () => {
       ],
     })
 
-    const result = extractDomainMapData(graph)
+    const result = extractDomainMap(graph)
 
     const ordersNode = result.domainNodes.find((n) => n.id === 'orders')
     expect(ordersNode?.data.isExternal).toBe(false)
