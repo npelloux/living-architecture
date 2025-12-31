@@ -27,19 +27,17 @@ npx riviere builder component-checklist --output=".riviere/step-4-checklist.md"
 
 When tracing code, you'll encounter two types of calls:
 
-| Call Type | Command | Example |
-|-----------|---------|---------|
-| **Code call** (function/method) | `link` | UseCase → DomainOp, API → UseCase |
-| **HTTP call** (network) | `link-http` | BFF → Backend API, Service → External API |
+| Call Type | Command | How Source is Specified | Example |
+|-----------|---------|-------------------------|---------|
+| **Code call** (function/method) | `link` | You provide source ID via `--from` | API → UseCase, UseCase → DomainOp |
+| **HTTP call** (network) | `link-http` | Command finds source API by `--path` | Link FROM an API to its UseCase |
 
-**Use `link`** when you see direct function calls within the same codebase.
+**Use `link`** when you see direct function calls within the same codebase. You must know the source component ID.
 
-**Use `link-http`** when you see HTTP client calls. This command:
-- Searches by method + path (handles parameter variations automatically)
-- Creates internal link if match found
-- Creates external link if no match (when `--domain` not specified)
-
-**Tip:** If `--domain` is provided, the target MUST exist in that domain or the command errors. Use this for BFF → Backend links where you know the target domain.
+**Use `link-http`** when you want to link FROM an API endpoint and you know its HTTP path but not its component ID. This command:
+- Finds the source API by matching `--path` and optionally `--method`
+- Links FROM that API TO the target component you specify
+- Handles path parameter variations automatically (`{id}`, `:id`, etc.)
 
 ## Process
 
@@ -73,35 +71,16 @@ The link is **API → UseCase**.
 
 ## CLI Commands
 
-### Code links (function calls within codebase)
-
-```bash
-npx riviere builder link \
-  --from "[source-id]" \
-  --to-type [Type] --to-domain [domain] --to-module [module] --to-name "[name]" \
-  --link-type [sync|async]
+**Fetch the CLI reference for full command syntax and examples:**
+```
+https://raw.githubusercontent.com/NTCoding/living-architecture/main/packages/riviere-cli/docs/generated/cli-reference.md
 ```
 
-### HTTP links (network calls)
-
-```bash
-# Internal API (domain specified = must exist)
-npx riviere builder link-http \
-  --from "[source-id]" \
-  --method [GET|POST|PUT|PATCH|DELETE] \
-  --path "/path/to/endpoint" \
-  --to-domain "[target-domain]"
-
-# External API (use link-external command)
-npx riviere builder link-external \
-  --from "[source-id]" \
-  --system "[External System Name]" \
-  --description "[what this external call does]"
-```
-
-**Path matching:** Handles parameter variations automatically:
-- `{id}`, `:id`, and actual values like `123` all match each other
-- `/companies/{companyId}/employees` matches `/companies/123/employees`
+| Command | When to Use |
+|---------|-------------|
+| `link` | Code calls (function/method invocations) |
+| `link-http` | Find API by HTTP path and link to target |
+| `link-external` | Links to systems not in this graph |
 
 ## Update Checklist
 
