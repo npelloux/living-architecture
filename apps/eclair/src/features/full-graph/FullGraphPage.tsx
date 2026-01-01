@@ -157,6 +157,10 @@ export function FullGraphPage({ graph }: FullGraphPageProps): React.ReactElement
     setTooltipData(null)
   }, [])
 
+  const handleBackgroundClick = useCallback(() => {
+    setHighlightedNodeId(null)
+  }, [])
+
   const handleNodeHover = useCallback((data: TooltipData | null) => {
     if (tooltipHideTimeoutRef.current) {
       clearTimeout(tooltipHideTimeoutRef.current)
@@ -269,10 +273,10 @@ export function FullGraphPage({ graph }: FullGraphPageProps): React.ReactElement
         highlightedNodeIds={highlightedNodeIds}
         highlightedNodeId={highlightedNodeId}
         visibleNodeIds={visibleNodeIds}
-        visibleTypes={visibleTypes}
         focusedDomain={focusedDomain}
         onNodeClick={handleNodeClick}
         onNodeHover={handleNodeHover}
+        onBackgroundClick={handleBackgroundClick}
       />
 
       {focusedDomain !== null && focusedDomain !== HIDE_ALL_DOMAINS && (

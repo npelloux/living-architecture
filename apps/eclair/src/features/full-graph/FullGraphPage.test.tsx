@@ -9,10 +9,10 @@ import { parseNode, parseEdge, parseDomainKey } from '@/lib/riviereTestData'
 import type { TooltipData, SimulationNode } from './types'
 const testSourceLocation = { repository: 'test-repo', filePath: 'src/test.ts' }
 
-const { capturedOnNodeHover, capturedVisibleTypes } = vi.hoisted(() => {
+const { capturedOnNodeHover, capturedOnBackgroundClick } = vi.hoisted(() => {
   const hoverRef: { current: ((data: TooltipData | null) => void) | undefined } = { current: undefined }
-  const typesRef: { current: Set<import('@/types/riviere').NodeType> | undefined } = { current: undefined }
-  return { capturedOnNodeHover: hoverRef, capturedVisibleTypes: typesRef }
+  const backgroundClickRef: { current: (() => void) | undefined } = { current: undefined }
+  return { capturedOnNodeHover: hoverRef, capturedOnBackgroundClick: backgroundClickRef }
 })
 
 const mockGraph: RiviereGraph = {
@@ -42,20 +42,19 @@ vi.mock('@/contexts/ThemeContext', () => ({
 vi.mock('./components/ForceGraph/ForceGraph', () => ({
   ForceGraph: (props: {
     onNodeHover?: (data: TooltipData | null) => void
+    onBackgroundClick?: () => void
     highlightedNodeId?: string | null
-    visibleTypes?: Set<import('@/types/riviere').NodeType>
   }) => {
     if (props.onNodeHover !== undefined) {
       capturedOnNodeHover.current = props.onNodeHover
     }
-    if (props.visibleTypes !== undefined) {
-      capturedVisibleTypes.current = props.visibleTypes
+    if (props.onBackgroundClick !== undefined) {
+      capturedOnBackgroundClick.current = props.onBackgroundClick
     }
     return (
       <div
         data-testid="force-graph-container"
         data-highlighted-node={props.highlightedNodeId}
-        data-has-external-visible={props.visibleTypes?.has('External') ?? true}
       />
     )
   },
@@ -117,6 +116,18 @@ describe('FullGraphPage', () => {
   test('highlights node from URL query param', () => {
     renderWithRouter(['/full-graph?node=node-1'])
     expect(screen.getByTestId('force-graph-container')).toHaveAttribute('data-highlighted-node', 'node-1')
+  })
+
+  test('clears highlighted node when background is clicked', () => {
+    renderWithRouter(['/full-graph?node=node-1'])
+
+    expect(screen.getByTestId('force-graph-container')).toHaveAttribute('data-highlighted-node', 'node-1')
+
+    act(() => {
+      capturedOnBackgroundClick.current?.()
+    })
+
+    expect(screen.getByTestId('force-graph-container')).not.toHaveAttribute('data-highlighted-node', 'node-1')
   })
 
   describe('focused domain feature', () => {
@@ -340,19 +351,19 @@ describe('FullGraphPage', () => {
       expect(screen.queryByTestId('node-type-checkbox-External')).not.toBeInTheDocument()
     })
 
-    test('hides external nodes when External type is unchecked', async () => {
+    test('unchecks External checkbox when clicked', async () => {
       const user = userEvent.setup()
       renderWithExternals()
 
       const filterToggle = screen.getByTestId('filter-toggle')
       await user.click(filterToggle)
 
-      expect(screen.getByTestId('force-graph-container')).toHaveAttribute('data-has-external-visible', 'true')
-
       const externalCheckbox = screen.getByTestId('node-type-checkbox-External')
+      expect(externalCheckbox).toBeChecked()
+
       await user.click(externalCheckbox)
 
-      expect(screen.getByTestId('force-graph-container')).toHaveAttribute('data-has-external-visible', 'false')
+      expect(externalCheckbox).not.toBeChecked()
     })
   })
 
