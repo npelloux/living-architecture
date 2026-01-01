@@ -18,13 +18,16 @@
 
 ## Starting Work
 
+> **Branch Protection:** Direct pushes to `main` are blocked. All changes must go through pull requests.
+
 ```bash
 task-master next                                    # Find next available task
 task-master show <id>                               # Review task details
 task-master set-status --id=<id> --status=in-progress   # Mark as in-progress
+git checkout -b <task-id>-<short-description>       # Create feature branch
 ```
 
-**Before any work:** Always set the task to `in-progress`. Never start work on a task without marking it first.
+**Before any work:** Always set the task to `in-progress` and create a feature branch. Never start work without both steps.
 
 When starting work on a specific task, read related files (PRD, referenced code) to get full context.
 
@@ -128,14 +131,13 @@ task-master set-status --id=<id> --status=done
 
 All changes go through PRs to ensure SonarCloud checks run:
 
-1. Create feature branch: `git checkout -b <task-id>-<short-description>`
-2. Commit changes: `git add -A && git commit -m "feat: description"`
-3. Push branch: `git push -u origin HEAD`
-4. Create PR: `gh pr create --title "feat(scope): description" --fill`
+1. Commit changes: `git add -A && git commit -m "feat: description"`
+2. Push branch: `git push -u origin HEAD`
+3. Create PR: `gh pr create --title "feat(scope): description" --fill`
    - PR title must follow conventional commits (validated by CI)
-5. Wait for checks: `gh pr checks --watch`
-6. If SonarCloud fails, see [SonarCloud Feedback Loop](#sonarcloud-feedback-loop)
-7. User merges PR when checks pass
+4. Wait for checks: `gh pr checks --watch`
+5. If SonarCloud fails, see [SonarCloud Feedback Loop](#sonarcloud-feedback-loop)
+6. User merges PR when checks pass
 
 ### SonarCloud Feedback Loop
 
