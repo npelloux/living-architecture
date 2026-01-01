@@ -37,7 +37,7 @@ function findOrphanNodeIds(nodes: Node[], edges: Edge[]): Set<string> {
 }
 
 interface FullGraphPageProps {
-  graph: RiviereGraph
+  readonly graph: RiviereGraph
 }
 
 interface DomainInfo {
@@ -81,7 +81,7 @@ function extractNodeTypes(graph: RiviereGraph): NodeTypeInfo[] {
     .sort((a, b) => a.type.localeCompare(b.type))
 }
 
-export function FullGraphPage({ graph }: FullGraphPageProps): React.ReactElement {
+export function FullGraphPage({ graph }: Readonly<FullGraphPageProps>): React.ReactElement {
   const { theme } = useTheme()
   const { registerExportHandlers, clearExportHandlers } = useExport()
   const [searchParams] = useSearchParams()
@@ -155,6 +155,10 @@ export function FullGraphPage({ graph }: FullGraphPageProps): React.ReactElement
   const handleNodeClick = useCallback((nodeId: string) => {
     setHighlightedNodeId((prev) => (prev === nodeId ? null : nodeId))
     setTooltipData(null)
+  }, [])
+
+  const handleBackgroundClick = useCallback(() => {
+    setHighlightedNodeId(null)
   }, [])
 
   const handleNodeHover = useCallback((data: TooltipData | null) => {
@@ -238,7 +242,7 @@ export function FullGraphPage({ graph }: FullGraphPageProps): React.ReactElement
         const backgroundColor = getComputedStyle(document.documentElement)
           .getPropertyValue('--bg-primary')
           .trim()
-        void exportElementAsPng(exportContainerRef.current, filename, { backgroundColor })
+        exportElementAsPng(exportContainerRef.current, filename, { backgroundColor }).catch(console.error)
       }
     }
 
@@ -269,10 +273,10 @@ export function FullGraphPage({ graph }: FullGraphPageProps): React.ReactElement
         highlightedNodeIds={highlightedNodeIds}
         highlightedNodeId={highlightedNodeId}
         visibleNodeIds={visibleNodeIds}
-        visibleTypes={visibleTypes}
         focusedDomain={focusedDomain}
         onNodeClick={handleNodeClick}
         onNodeHover={handleNodeHover}
+        onBackgroundClick={handleBackgroundClick}
       />
 
       {focusedDomain !== null && focusedDomain !== HIDE_ALL_DOMAINS && (

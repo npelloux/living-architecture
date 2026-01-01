@@ -150,12 +150,12 @@ If SonarCloud check fails on your PR:
 
 2. Query issues via SonarCloud API:
    ```bash
-   curl -s "https://sonarcloud.io/api/issues/search?projectKey=NTCoding_living-architecture&pullRequest=$(gh pr view --json number -q .number)&severities=CRITICAL,BLOCKER,MAJOR" | jq '.issues[] | {rule: .rule, message: .message, file: .component, line: .line}'
+   curl -s "https://sonarcloud.io/api/issues/search?organization=nick-tune-org&projectKeys=NTCoding_living-architecture&pullRequest=$(gh pr view --json number -q .number)&severities=CRITICAL,BLOCKER,MAJOR" | jq '.issues[] | {rule: .rule, message: .message, file: .component, line: .line}'
    ```
 
 3. Query security hotspots:
    ```bash
-   curl -s "https://sonarcloud.io/api/hotspots/search?projectKey=NTCoding_living-architecture&pullRequest=$(gh pr view --json number -q .number)" | jq '.hotspots[] | {message: .message, file: .component, line: .line}'
+   curl -s "https://sonarcloud.io/api/hotspots/search?organization=nick-tune-org&projectKey=NTCoding_living-architecture&pullRequest=$(gh pr view --json number -q .number)" | jq '.hotspots[] | {message: .message, file: .component, line: .line}'
    ```
 
 4. Fix identified issues locally

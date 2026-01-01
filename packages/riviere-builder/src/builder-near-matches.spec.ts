@@ -50,29 +50,35 @@ function firstResult<T>(results: T[]): T {
 
 describe('RiviereBuilder.nearMatches', () => {
   describe('same name, wrong type (most common mistake)', () => {
-    it.each([
-      [
-        { name: 'OrderPlaced', type: 'UseCase' as const },
-        { expectedName: 'OrderPlaced', expectedType: 'Event', mismatchField: 'type' },
-        'exact name with wrong type returns match with type mismatch',
-      ],
-      [
-        { name: 'OrderService', type: 'Event' as const },
-        { expectedName: 'OrderService', expectedType: 'UseCase', mismatchField: 'type' },
-        'UseCase found when Event expected',
-      ],
-    ])('nearMatches(%o) - %s', (query, expected, _description) => {
+    it('exact name with wrong type returns match with type mismatch', () => {
       const builder = createBuilderWithComponents()
+      const query = { name: 'OrderPlaced', type: 'UseCase' as const }
       const results = builder.nearMatches(query)
 
       expect(results.length).toBeGreaterThan(0)
       const first = firstResult(results)
-      expect(first.component.name).toBe(expected.expectedName)
-      expect(first.component.type).toBe(expected.expectedType)
+      expect(first.component.name).toBe('OrderPlaced')
+      expect(first.component.type).toBe('Event')
       expect(first.mismatch).toEqual({
-        field: expected.mismatchField,
-        expected: query.type,
-        actual: expected.expectedType,
+        field: 'type',
+        expected: 'UseCase',
+        actual: 'Event',
+      })
+    })
+
+    it('UseCase found when Event expected', () => {
+      const builder = createBuilderWithComponents()
+      const query = { name: 'OrderService', type: 'Event' as const }
+      const results = builder.nearMatches(query)
+
+      expect(results.length).toBeGreaterThan(0)
+      const first = firstResult(results)
+      expect(first.component.name).toBe('OrderService')
+      expect(first.component.type).toBe('UseCase')
+      expect(first.mismatch).toEqual({
+        field: 'type',
+        expected: 'Event',
+        actual: 'UseCase',
       })
     })
   })
@@ -84,7 +90,7 @@ describe('RiviereBuilder.nearMatches', () => {
         { expectedName: 'OrderService', expectedDomain: 'orders', mismatchField: 'domain' },
         'exact name with wrong domain returns match with domain mismatch',
       ],
-    ])('nearMatches(%o) - %s', (query, expected, _description) => {
+    ])('nearMatches(%o) - %s', (query, expected) => {
       const builder = createBuilderWithComponents()
       const results = builder.nearMatches(query)
 
@@ -106,7 +112,7 @@ describe('RiviereBuilder.nearMatches', () => {
       [{ name: 'OrderServce' }, 'OrderService', 'missing char finds match'],
       [{ name: 'OrderSerivce' }, 'OrderService', 'transposed chars finds match'],
       [{ name: 'Paymentservice' }, 'PaymentService', 'case difference finds match'],
-    ])('nearMatches(%o) finds "%s" - %s', (query, expectedName, _description) => {
+    ])('nearMatches(%o) finds "%s" - %s', (query, expectedName) => {
       const builder = createBuilderWithComponents()
       const results = builder.nearMatches(query)
 
@@ -122,7 +128,7 @@ describe('RiviereBuilder.nearMatches', () => {
       [{ name: 'XYZ123' }, 'completely different returns empty'],
       [{ name: 'Foo' }, 'short unrelated returns empty'],
       [{ name: '' }, 'empty name returns empty'],
-    ])('nearMatches(%o) returns [] - %s', (query, _description) => {
+    ])('nearMatches(%o) returns [] - %s', (query) => {
       const builder = createBuilderWithComponents()
       const results = builder.nearMatches(query)
 

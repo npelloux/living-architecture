@@ -11,8 +11,10 @@ export default defineConfig(() => ({
     include: ['{src,tests}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     reporters: ['default'],
     coverage: {
+      enabled: true,
       reportsDirectory: './test-output/vitest/coverage',
       provider: 'v8' as const,
+      reporter: ['text', 'lcov'],
       exclude: ['**/*test-fixtures.ts'],
       thresholds: {
         lines: 100,

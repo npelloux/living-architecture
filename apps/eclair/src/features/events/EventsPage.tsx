@@ -5,14 +5,25 @@ import { EventAccordion } from '@/features/domains/components/EventAccordion/Eve
 import type { DomainEvent } from '@/features/domains/extractDomainDetails'
 
 interface EventsPageProps {
-  graph: RiviereGraph
+  readonly graph: RiviereGraph
 }
 
 interface PublishedEvent extends DomainEvent {
   domain: string
 }
 
-export function EventsPage({ graph }: EventsPageProps): React.ReactElement {
+function handlerSubscribesToEvent(
+  subscribedEvents: string[] | undefined,
+  eventName: string,
+  eventId: string
+): boolean {
+  if (subscribedEvents === undefined) return false
+  return subscribedEvents.some(
+    (name) => name === eventName || eventId.includes(name)
+  )
+}
+
+export function EventsPage({ graph }: Readonly<EventsPageProps>): React.ReactElement {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
@@ -24,7 +35,7 @@ export function EventsPage({ graph }: EventsPageProps): React.ReactElement {
     navigate(`/full-graph?node=${eventId}${demoParam}`)
   }, [navigate, searchParams])
 
-  const { publishedEvents, domains } = useMemo(() => {
+  const { publishedEvents, domains } = useMemo((): { publishedEvents: PublishedEvent[]; domains: string[] } => {
     const published: PublishedEvent[] = []
     const domainSet = new Set<string>()
 
@@ -35,14 +46,9 @@ export function EventsPage({ graph }: EventsPageProps): React.ReactElement {
       domainSet.add(eventNode.domain)
 
       const eventHandlers = eventHandlerNodes
-        .filter((handler) => {
-          const subscribedEvents = handler.subscribedEvents
-          if (subscribedEvents === undefined) return false
-          return subscribedEvents.some((eventName) =>
-            eventName === eventNode.name ||
-            eventNode.id.includes(eventName)
-          )
-        })
+        .filter((handler) =>
+          handlerSubscribesToEvent(handler.subscribedEvents, eventNode.name, eventNode.id)
+        )
         .map((h) => ({
           domain: h.domain,
           handlerName: h.name,
@@ -59,16 +65,16 @@ export function EventsPage({ graph }: EventsPageProps): React.ReactElement {
     })
 
     return {
-      publishedEvents: published.sort((a, b) => {
+      publishedEvents: [...published].sort((a: PublishedEvent, b: PublishedEvent) => {
         const domainCompare = a.domain.localeCompare(b.domain)
         if (domainCompare !== 0) return domainCompare
         return a.eventName.localeCompare(b.eventName)
       }),
-      domains: Array.from(domainSet).sort(),
+      domains: Array.from(domainSet).sort((a: string, b: string) => a.localeCompare(b)),
     }
   }, [graph])
 
-  const filteredPublished = useMemo(() => {
+  const filteredPublished = useMemo((): PublishedEvent[] => {
     return publishedEvents.filter((event) => {
       const matchesSearch =
         searchQuery === '' ||

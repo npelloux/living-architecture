@@ -5,17 +5,17 @@ import { FlowCard } from './components/FlowCard/FlowCard'
 import { useFlowsState, type FlowFilter } from './hooks/useFlowsState'
 
 interface FlowsPageProps {
-  graph: RiviereGraph
+  readonly graph: RiviereGraph
 }
 
-export function FlowsPage({ graph }: FlowsPageProps): React.ReactElement {
+export function FlowsPage({ graph }: Readonly<FlowsPageProps>): React.ReactElement {
   const { searchQuery, setSearchQuery, activeFilter, setActiveFilter, expandedFlowIds, toggleFlow, activeDomains, toggleDomain } = useFlowsState()
 
   const flows = useMemo(() => extractFlows(graph), [graph])
 
   const domains = useMemo(() => {
     const domainSet = new Set(flows.map((f) => f.entryPoint.domain))
-    return Array.from(domainSet).sort()
+    return Array.from(domainSet).sort((a, b) => a.localeCompare(b))
   }, [flows])
 
   const filteredFlows = useMemo(() => {

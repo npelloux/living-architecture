@@ -1,15 +1,15 @@
-import { createContext, useContext, useState, useCallback, useEffect, useRef, useSyncExternalStore } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect, useRef, useSyncExternalStore, useMemo } from 'react'
 import type { RiviereGraph, GraphName } from '@/types/riviere'
 import { graphNameSchema } from '@/types/riviere'
 import { parseRiviereGraph } from '@living-architecture/riviere-schema'
 
 interface GraphContextValue {
-  graph: RiviereGraph | null
-  setGraph: (graph: RiviereGraph | null) => void
-  clearGraph: () => void
-  hasGraph: boolean
-  graphName: GraphName | undefined
-  isLoadingDemo: boolean
+  readonly graph: RiviereGraph | null
+  readonly setGraph: (graph: RiviereGraph | null) => void
+  readonly clearGraph: () => void
+  readonly hasGraph: boolean
+  readonly graphName: GraphName | undefined
+  readonly isLoadingDemo: boolean
 }
 
 const graphContext = createContext<GraphContextValue | null>(null)
@@ -50,7 +50,7 @@ function useIsDemoMode(): boolean {
 }
 
 interface GraphProviderProps {
-  children: React.ReactNode
+  readonly children: React.ReactNode
 }
 
 export function GraphProvider({ children }: GraphProviderProps): React.ReactElement {
@@ -94,8 +94,13 @@ export function GraphProvider({ children }: GraphProviderProps): React.ReactElem
     ? graphNameSchema.parse(graph.metadata.name)
     : undefined
 
+  const contextValue = useMemo(
+    () => ({ graph, setGraph, clearGraph, hasGraph, graphName, isLoadingDemo }),
+    [graph, setGraph, clearGraph, hasGraph, graphName, isLoadingDemo]
+  )
+
   return (
-    <graphContext.Provider value={{ graph, setGraph, clearGraph, hasGraph, graphName, isLoadingDemo }}>
+    <graphContext.Provider value={contextValue}>
       {children}
     </graphContext.Provider>
   )

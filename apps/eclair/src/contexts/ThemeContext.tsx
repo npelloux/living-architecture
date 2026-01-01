@@ -1,10 +1,10 @@
-import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
 import type { Theme } from '@/types/theme'
 import { DEFAULT_THEME, THEME_STORAGE_KEY } from '@/types/theme'
 
 interface ThemeContextValue {
-  theme: Theme
-  setTheme: (theme: Theme) => void
+  readonly theme: Theme
+  readonly setTheme: (theme: Theme) => void
 }
 
 const themeContext = createContext<ThemeContextValue | null>(null)
@@ -26,7 +26,7 @@ function applyThemeToDocument(theme: Theme): void {
 }
 
 interface ThemeProviderProps {
-  children: React.ReactNode
+  readonly children: React.ReactNode
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElement {
@@ -42,8 +42,10 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
     applyThemeToDocument(theme)
   }, [theme])
 
+  const contextValue = useMemo(() => ({ theme, setTheme }), [theme, setTheme])
+
   return (
-    <themeContext.Provider value={{ theme, setTheme }}>
+    <themeContext.Provider value={contextValue}>
       {children}
     </themeContext.Provider>
   )
