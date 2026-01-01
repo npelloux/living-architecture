@@ -59,7 +59,7 @@ interface ConnectionAggregation {
 
 type EdgeType = 'sync' | 'async' | 'unknown'
 
-function parseEdgeType(type: string): EdgeType {
+function parseEdgeType(type: string | undefined): EdgeType {
   if (type === 'async') return 'async'
   if (type === 'sync') return 'sync'
   return 'unknown'
