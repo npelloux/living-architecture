@@ -124,9 +124,35 @@ task-master set-status --id=<id> --status=done
 
 → Mark as `blocked` if incomplete. Ask for approval if complete.
 
-### Commit changes
+### Commit and Push via PR
 
-Commit all changes include any task files
+All changes go through PRs to ensure SonarCloud checks run:
+
+1. Create feature branch: `git checkout -b <task-id>-<short-description>`
+2. Commit changes: `git add -A && git commit -m "feat: description"`
+3. Push branch: `git push -u origin HEAD`
+4. Create PR: `gh pr create --fill`
+5. Wait for checks: `gh pr checks --watch`
+6. If SonarCloud fails, see [SonarCloud Feedback Loop](#sonarcloud-feedback-loop)
+7. Merge PR when checks pass (squash recommended)
+
+### SonarCloud Feedback Loop
+
+If SonarCloud check fails on your PR:
+
+1. Query issues via GitHub API:
+   ```bash
+   gh api "repos/$(gh repo view --json nameWithOwner -q .nameWithOwner)/pulls/$(gh pr view --json number -q .number)/comments" | jq '.[] | select(.user.login == "sonarcloud[bot]")'
+   ```
+
+   Or query SonarCloud API directly:
+   ```bash
+   curl -s "https://sonarcloud.io/api/issues/search?projectKey=nick-tune-org_living-architecture&pullRequest=$(gh pr view --json number -q .number)&severities=CRITICAL,BLOCKER,MAJOR" | jq '.issues[] | {rule: .rule, message: .message, file: .component, line: .line}'
+   ```
+
+2. Fix identified issues locally
+3. Commit and push: `git add -A && git commit -m "fix: address SonarCloud issues" && git push`
+4. Repeat until checks pass
 
 ### Documentation check
 
