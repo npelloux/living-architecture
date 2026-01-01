@@ -42,7 +42,7 @@ export function FlowCard({ flow, graph, expanded, onToggle }: Readonly<FlowCardP
           <span className="flow-item-domain">{entryPoint.domain}</span>
         </div>
         <div data-testid="flow-item-actions" className="flow-item-actions">
-          {entryPoint.sourceLocation && (
+          {entryPoint.sourceLocation?.lineNumber !== undefined && (
             <CodeLinkMenu
               filePath={entryPoint.sourceLocation.filePath}
               lineNumber={entryPoint.sourceLocation.lineNumber}
