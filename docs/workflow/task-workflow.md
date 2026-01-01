@@ -18,13 +18,16 @@
 
 ## Starting Work
 
+> **Branch Protection:** Direct pushes to `main` are blocked. All changes must go through pull requests.
+
 ```bash
 task-master next                                    # Find next available task
 task-master show <id>                               # Review task details
 task-master set-status --id=<id> --status=in-progress   # Mark as in-progress
+git checkout -b <task-id>-<short-description>       # Create feature branch
 ```
 
-**Before any work:** Always set the task to `in-progress`. Never start work on a task without marking it first.
+**Before any work:** Always set the task to `in-progress` and create a feature branch. Never start work without both steps.
 
 When starting work on a specific task, read related files (PRD, referenced code) to get full context.
 
@@ -124,9 +127,40 @@ task-master set-status --id=<id> --status=done
 
 → Mark as `blocked` if incomplete. Ask for approval if complete.
 
-### Commit changes
+### Commit and Push via PR
 
-Commit all changes include any task files
+All changes go through PRs to ensure SonarCloud checks run:
+
+1. Commit changes: `git add -A && git commit -m "feat: description"`
+2. Push branch: `git push -u origin HEAD`
+3. Create PR: `gh pr create --title "feat(scope): description" --fill`
+   - PR title must follow conventional commits (validated by CI)
+4. Wait for checks: `gh pr checks --watch`
+5. If SonarCloud fails, see [SonarCloud Feedback Loop](#sonarcloud-feedback-loop)
+6. User merges PR when checks pass
+
+### SonarCloud Feedback Loop
+
+If SonarCloud check fails on your PR:
+
+1. Check PR comments from SonarCloud bot:
+   ```bash
+   gh pr view --comments | head -50
+   ```
+
+2. Query issues via SonarCloud API:
+   ```bash
+   curl -s "https://sonarcloud.io/api/issues/search?projectKey=NTCoding_living-architecture&pullRequest=$(gh pr view --json number -q .number)&severities=CRITICAL,BLOCKER,MAJOR" | jq '.issues[] | {rule: .rule, message: .message, file: .component, line: .line}'
+   ```
+
+3. Query security hotspots:
+   ```bash
+   curl -s "https://sonarcloud.io/api/hotspots/search?projectKey=NTCoding_living-architecture&pullRequest=$(gh pr view --json number -q .number)" | jq '.hotspots[] | {message: .message, file: .component, line: .line}'
+   ```
+
+4. Fix identified issues locally
+5. Commit and push: `git add -A && git commit -m "fix: address SonarCloud issues" && git push`
+6. Repeat until checks pass
 
 ### Documentation check
 
@@ -205,15 +239,25 @@ Do not use these commands (they invoke AI, which is wasteful and unreliable):
 
 ## Quick Reference
 
-### Essential Commands
+### Task Commands
 
 | Command | Purpose |
 |---------|---------|
 | `task-master list` | Show all tasks with status |
 | `task-master next` | Get next available task |
-| `task-master show <id>` | View task details (e.g., `task-master show 1.2`) |
+| `task-master show <id>` | View task details |
 | `task-master set-status --id=<id> --status=<status>` | Update task status |
 | `task-master add-task --title="..." --description="..."` | Create new task |
+
+### Git & PR Commands
+
+| Command | Purpose |
+|---------|---------|
+| `git checkout -b <branch>` | Create feature branch |
+| `git push -u origin HEAD` | Push branch to remote |
+| `gh pr create --title "feat: ..." --fill` | Create pull request |
+| `gh pr checks --watch` | Watch CI checks |
+| `gh pr view --comments` | View PR comments (SonarCloud feedback) |
 
 ### Task ID Format
 
