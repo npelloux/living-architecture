@@ -64,8 +64,10 @@ nx test [project-name] -- --testNamePattern "should validate"
 ### Verify (Full Gate)
 
 ```bash
-nx run-many -t lint,typecheck,test --coverage
+nx run-many -t lint,typecheck,test
 ```
+
+Coverage is always enabled in vitest configs.
 
 ### Dependency Graph
 
