@@ -62,7 +62,7 @@ Clone the repo and run Éclair with the demo graph.
 git clone https://github.com/NTCoding/living-architecture.git
 cd living-architecture
 pnpm install
-nx serve eclair
+pnpm nx serve eclair
 ```
 
 Open [localhost:5173/eclair](http://localhost:5173/eclair/)
