@@ -18,6 +18,7 @@
       "serve": {
         "executor": "nx:run-commands",
         "continuous": true,
+        "dependsOn": ["^build"],
         "options": {
           "command": "vite",
           "cwd": "apps/eclair"
