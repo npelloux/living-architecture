@@ -15,4 +15,6 @@ knowledge_base:
       - "docs/conventions/anti-patterns.md"
       - "docs/conventions/testing.md"
       - "docs/conventions/standard-patterns.md"
+      - "docs/conventions/codebase-structure.md"
+      - "docs/architecture/overview.md"
       - "docs/workflow/code-review.md"
