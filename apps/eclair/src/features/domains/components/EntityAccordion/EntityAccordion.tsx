@@ -64,8 +64,8 @@ export function EntityAccordion({
       <div
         className={`flex w-full items-center justify-between gap-4 p-4 transition-colors ${
           isExpanded
-            ? 'border-b border-[#8B5CF6] bg-gradient-to-r from-[rgba(139,92,246,0.08)] to-[rgba(124,58,237,0.08)]'
-            : 'bg-[var(--bg-secondary)] shadow-sm hover:border-[#8B5CF6]'
+            ? 'border-b border-[var(--node-domainop)] bg-gradient-to-r from-[rgba(245,158,11,0.08)] to-[rgba(251,191,36,0.08)]'
+            : 'bg-[var(--bg-secondary)] shadow-sm hover:border-[var(--node-domainop)]'
         }`}
       >
         <button
@@ -74,7 +74,7 @@ export function EntityAccordion({
           aria-expanded={isExpanded}
           className="flex min-w-0 flex-1 items-center gap-3 text-left"
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#8B5CF6] to-[#7C3AED] text-white">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--node-domainop)] text-white">
             <i className="ph ph-cube text-lg" aria-hidden="true" />
           </div>
           <div className="min-w-0">
@@ -91,7 +91,7 @@ export function EntityAccordion({
       </div>
 
       {isExpanded && (
-        <div className="border-t border-[#8B5CF6] bg-[var(--bg-secondary)] p-4">
+        <div className="border-t border-[var(--node-domainop)] bg-[var(--bg-secondary)] p-4">
           {entity.hasStates() && (
             <div className="mb-4">
               <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[var(--text-tertiary)]">
@@ -102,7 +102,7 @@ export function EntityAccordion({
                 {entity.states.map((state, index) => {
                   const getStateBorderClass = (): string => {
                     if (index === 0) return 'border-[var(--green)] bg-[rgba(16,185,129,0.1)] text-[var(--text-primary)]'
-                    if (index === entity.states.length - 1) return 'border-[#8B5CF6] bg-[rgba(139,92,246,0.1)] text-[var(--text-primary)]'
+                    if (index === entity.states.length - 1) return 'border-[var(--node-domainop)] bg-[rgba(245,158,11,0.1)] text-[var(--text-primary)]'
                     return 'border-[var(--border-color)] bg-[var(--bg-secondary)] text-[var(--text-primary)]'
                   }
                   const borderClass = getStateBorderClass()
@@ -121,23 +121,6 @@ export function EntityAccordion({
             </div>
           )}
 
-          {entity.hasBusinessRules() && (
-            <div className="mb-4">
-              <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[var(--text-tertiary)]">
-                <i className="ph ph-shield-check text-[var(--primary)]" aria-hidden="true" />
-                Business Rules
-              </div>
-              <div className="space-y-2">
-                {entity.businessRules.map((rule, index) => (
-                  <div key={index} className="flex items-start gap-2 rounded-lg bg-[var(--bg-tertiary)] p-3 text-sm text-[var(--text-secondary)]">
-                    <i className="ph ph-check-circle shrink-0 text-[var(--amber)]" aria-hidden="true" />
-                    <span>{rule}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {(() => {
             if (entity.operations.length > 0) {
               return (
@@ -148,16 +131,16 @@ export function EntityAccordion({
                   </div>
                   <div className="space-y-3">
                     {entity.operations.map((op) => (
-                      <MethodCard key={op.id} operation={op} businessRules={entity.businessRules} />
+                      <MethodCard key={op.id} operation={op} businessRules={op.businessRules ?? []} />
                     ))}
                   </div>
                 </div>
               )
             }
-            if (!entity.hasStates() && !entity.hasBusinessRules()) {
+            if (!entity.hasStates()) {
               return (
                 <div className="text-sm italic text-[var(--text-tertiary)]">
-                  No states, rules, or methods defined
+                  No states or methods defined
                 </div>
               )
             }
@@ -180,8 +163,8 @@ function MethodCard({ operation, businessRules }: Readonly<MethodCardProps>): Re
   return (
     <div className="rounded-lg bg-[var(--bg-secondary)] shadow-sm">
       <MethodCardHeader operation={operation} isExpanded={isExpanded} onToggle={() => setIsExpanded(!isExpanded)} />
-      {isExpanded && operation.behavior !== undefined && (
-        <MethodCardContent behavior={operation.behavior} businessRules={businessRules} />
+      {isExpanded && (
+        <MethodCardContent operation={operation} businessRules={businessRules} />
       )}
     </div>
   )
@@ -218,7 +201,7 @@ function MethodCardButton({ operation, isExpanded, onToggle }: Readonly<MethodCa
       type="button"
       onClick={onToggle}
       aria-expanded={isExpanded}
-      className="flex min-w-0 flex-1 items-center gap-3 text-left hover:opacity-80"
+      className="flex min-w-0 flex-1 items-center gap-3 rounded-md px-2 py-1 -mx-2 text-left transition-colors hover:bg-[var(--bg-tertiary)]"
     >
       <MethodSignature operation={operation} />
       <StateChangesTag operation={operation} />
@@ -246,7 +229,7 @@ function MethodSignature({ operation }: Readonly<MethodSignatureProps>): React.R
         <>
           <span className="text-[var(--text-secondary)]">({formatParameters(operation.signature)})</span>
           {operation.signature.returnType !== undefined && (
-            <span className="text-[#8B5CF6]">: {operation.signature.returnType}</span>
+            <span className="text-[var(--node-domainop)]">: {operation.signature.returnType}</span>
           )}
         </>
       )}
@@ -313,12 +296,14 @@ function MethodCardAction({ operation }: Readonly<MethodCardActionProps>): React
 }
 
 interface MethodCardContentProps {
-  readonly behavior: Exclude<DomainOpComponent['behavior'], undefined>
+  readonly operation: DomainOpComponent
   readonly businessRules: readonly string[]
 }
 
-function MethodCardContent({ behavior, businessRules }: Readonly<MethodCardContentProps>): React.ReactElement {
+function MethodCardContent({ operation, businessRules }: Readonly<MethodCardContentProps>): React.ReactElement {
   const hasRulesToShow = businessRules.length > 0
+  const hasBehavior = operation.behavior !== undefined
+  const hasAnyContent = hasRulesToShow || hasBehavior
 
   return (
     <div className="p-4" data-testid="method-card-content">
@@ -338,12 +323,20 @@ function MethodCardContent({ behavior, businessRules }: Readonly<MethodCardConte
           </div>
         </div>
       )}
-      <div className="grid grid-cols-2 gap-3">
-        <BehaviorBox label="Reads" items={behavior.reads} icon="ph-book-open" color="blue" />
-        <BehaviorBox label="Validates" items={behavior.validates} icon="ph-shield-check" color="amber" />
-        <BehaviorBox label="Modifies" items={behavior.modifies} icon="ph-pencil-simple" color="green" />
-        <BehaviorBox label="Emits" items={behavior.emits} icon="ph-broadcast" color="purple" />
-      </div>
+      {hasBehavior && (
+        <div className="grid grid-cols-2 gap-3">
+          <BehaviorBox label="Reads" items={operation.behavior.reads} icon="ph-book-open" color="blue" />
+          <BehaviorBox label="Validates" items={operation.behavior.validates} icon="ph-shield-check" color="amber" />
+          <BehaviorBox label="Modifies" items={operation.behavior.modifies} icon="ph-pencil-simple" color="green" />
+          <BehaviorBox label="Emits" items={operation.behavior.emits} icon="ph-broadcast" color="purple" />
+        </div>
+      )}
+      {!hasAnyContent && (
+        <div className="flex items-center gap-2 text-sm text-[var(--text-tertiary)] italic">
+          <i className="ph ph-info" aria-hidden="true" />
+          <span>No additional behavior information available</span>
+        </div>
+      )}
     </div>
   )
 }
@@ -356,10 +349,10 @@ interface BehaviorBoxProps {
 }
 
 const colorStyles: Record<BehaviorBoxProps['color'], string> = {
-  blue: 'border-l-[#06B6D4]',
-  amber: 'border-l-[#F59E0B]',
-  green: 'border-l-[#10B981]',
-  purple: 'border-l-[#8B5CF6]',
+  blue: 'border-l-[var(--node-event)]',
+  amber: 'border-l-[var(--node-domainop)]',
+  green: 'border-l-[var(--green)]',
+  purple: 'border-l-[var(--purple)]',
 }
 
 function BehaviorBox({ label, items, icon, color }: Readonly<BehaviorBoxProps>): React.ReactElement {

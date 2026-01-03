@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { createSimulationNodes, createSimulationLinks, createExternalNodes, createExternalLinks, createLayoutEdges, isAsyncEdge, truncateName, getNodeColor, getNodeRadius, getEdgeColor, getDomainColor } from './VisualizationDataAdapters'
+import { createSimulationNodes, createSimulationLinks, createExternalNodes, createExternalLinks, createLayoutEdges, isAsyncEdge, truncateName, getNodeColor, getNodeRadius, getEdgeColor, getSemanticEdgeType, getSemanticEdgeColor, getDomainColor } from './VisualizationDataAdapters'
 import type { Node, Edge, ExternalLink } from '@/types/riviere'
 import { parseNode, parseEdge, parseNodeId } from '@/lib/riviereTestData'
 const testSourceLocation = { repository: 'test-repo', filePath: 'src/test.ts' }
@@ -300,6 +300,61 @@ describe('VisualizationDataAdapters', () => {
       const radius = getNodeRadius('External')
       expect(typeof radius).toBe('number')
       expect(radius).toBeGreaterThan(0)
+    })
+  })
+
+  describe('getSemanticEdgeType', () => {
+    it('returns event for edge targeting Event node', () => {
+      expect(getSemanticEdgeType('UseCase', 'Event')).toBe('event')
+      expect(getSemanticEdgeType('DomainOp', 'Event')).toBe('event')
+    })
+
+    it('returns default for edge from EventHandler node (not special anymore)', () => {
+      expect(getSemanticEdgeType('EventHandler', 'UseCase')).toBe('default')
+      expect(getSemanticEdgeType('EventHandler', 'DomainOp')).toBe('default')
+    })
+
+    it('returns default for edge targeting External node (not special anymore)', () => {
+      expect(getSemanticEdgeType('UseCase', 'External')).toBe('default')
+      expect(getSemanticEdgeType('API', 'External')).toBe('default')
+    })
+
+    it('returns default for standard edges', () => {
+      expect(getSemanticEdgeType('API', 'UseCase')).toBe('default')
+      expect(getSemanticEdgeType('UseCase', 'DomainOp')).toBe('default')
+      expect(getSemanticEdgeType('UI', 'API')).toBe('default')
+    })
+
+    it('returns event when target is Event even from EventHandler', () => {
+      expect(getSemanticEdgeType('EventHandler', 'Event')).toBe('event')
+    })
+  })
+
+  describe('getSemanticEdgeColor', () => {
+    it('returns brand-compliant event color for edge targeting Event node', () => {
+      expect(getSemanticEdgeColor('UseCase', 'Event', 'stream')).toBe('#FF6B6B')
+      expect(getSemanticEdgeColor('UseCase', 'Event', 'voltage')).toBe('#39FF14')
+      expect(getSemanticEdgeColor('UseCase', 'Event', 'circuit')).toBe('#1A7F37')
+    })
+
+    it('returns default color for edge from EventHandler node (not special)', () => {
+      expect(getSemanticEdgeColor('EventHandler', 'UseCase', 'stream')).toBe('#0D9488')
+    })
+
+    it('returns default color for edge targeting External node (not special)', () => {
+      expect(getSemanticEdgeColor('UseCase', 'External', 'stream')).toBe('#0D9488')
+    })
+
+    it('returns brand-compliant default color for standard edges', () => {
+      expect(getSemanticEdgeColor('API', 'UseCase', 'stream')).toBe('#0D9488')
+      expect(getSemanticEdgeColor('API', 'UseCase', 'voltage')).toBe('#00D4FF')
+      expect(getSemanticEdgeColor('API', 'UseCase', 'circuit')).toBe('#0969DA')
+    })
+
+    it('respects theme parameter', () => {
+      const streamColor = getSemanticEdgeColor('UseCase', 'Event', 'stream')
+      const voltageColor = getSemanticEdgeColor('UseCase', 'Event', 'voltage')
+      expect(streamColor).not.toBe(voltageColor)
     })
   })
 

@@ -52,7 +52,7 @@ GitHub automatically creates a link between issues.
 
 ## Starting Work
 
-> **Branch Protection:** Direct pushes to `main` are blocked. All changes must go through pull requests.
+> **Branch Protection:** Direct pushes to `main` are blocked. All changes must go through pull requests. Before ANY code changes or planning, you MUST be on a feature branch. If you're on `main`, create a branch first.
 
 ### Find the Active Milestone
 
@@ -83,14 +83,14 @@ Wait for user confirmation before proceeding.
 After user confirms:
 
 ```bash
-# Assign the issue
-gh issue edit <number> --add-assignee @me
-
 # Pull latest from main
 git checkout main && git pull origin main
 
-# Create feature branch
+# Create feature branch FIRST
 git checkout -b issue-<number>-short-description
+
+# Assign the issue
+gh issue edit <number> --add-assignee @me
 
 # Read issue details
 gh issue view <number>
@@ -114,9 +114,24 @@ gh issue edit <number> --body "Updated content"
 gh issue comment <number> --body "New insight: ..."
 ```
 
+### After Plan Discussions
+
+When plan discussions with the user change requirements, scope, or approach:
+
+1. Update the GitHub issue body immediately:
+   ```bash
+   gh issue edit <number> --body "Updated requirements..."
+   ```
+
+2. Ensure acceptance criteria reflect the agreed changes
+
+This keeps the issue as the single source of truth for reviewers.
+
 ---
 
 ## Completing Tasks
+
+> **CRITICAL:** A task is not complete until a PR exists and passes checks. Do not stop or ask the user until you reach "Notify user" step.
 
 Follow all steps autonomously. Only notify the user when the PR is ready for review.
 
@@ -174,19 +189,37 @@ git push -u origin HEAD
 # Create PR (auto-closes issue when merged)
 gh pr create --title "feat(scope): description" --body "Closes #<number>"
 
-# Wait for CI checks
+# Wait for CI checks (REQUIRED - do not skip)
 gh pr checks --watch --fail-fast -i 30
 ```
 
-The `--watch` flag blocks until all checks complete. Output shows `pass` or `fail` for each check.
+**You MUST run `gh pr checks --watch`** — this blocks until all CI checks complete.
 
-After checks complete, always proceed to [Address PR feedback](#address-pr-feedback) — CodeRabbit comments may exist even when checks pass.
+🚫 **NEVER** use `sleep && gh pr checks` patterns. The `--watch` flag handles waiting.
+
+**When checks pass:** Proceed to [Address PR feedback](#address-pr-feedback) — CodeRabbit comments may exist even when checks pass.
+
+**When checks fail:** Proceed to [Address PR feedback](#address-pr-feedback) — the PR comments contain what failed.
 
 ---
 
 ### Address PR feedback
 
-#### CodeRabbit comments
+> **CRITICAL:** Read PR comments FIRST. Bot comments (SonarCloud, CodeRabbit) explain exactly what failed. Do not investigate logs or query APIs until you've read the comments.
+
+#### Step 1: Read PR comments
+
+```bash
+gh pr view <number> --comments
+```
+
+Look for:
+- **SonarCloud Quality Gate** — Shows coverage %, duplications, issues blocking the gate
+- **CodeRabbit review** — Shows code review comments
+
+The comments tell you exactly what to fix. Read them before doing anything else.
+
+#### Step 2: CodeRabbit line comments
 
 ```bash
 gh api repos/NTCoding/living-architecture/pulls/<number>/comments --jq '.[] | select(.user.login | contains("coderabbitai")) | {file: .path, line: .line, body: .body}'
@@ -194,9 +227,9 @@ gh api repos/NTCoding/living-architecture/pulls/<number>/comments --jq '.[] | se
 
 Fix valid issues. For nitpicks or disagreements, reply explaining your reasoning (don't dismiss — leave visible for user review).
 
-#### SonarCloud issues
+#### Step 3: SonarCloud details (if needed)
 
-Always query and fix SonarCloud issues, even if checks pass (some issues may not block the PR).
+The PR comment shows coverage % and what's blocking the Quality Gate. If you need specific file/line details:
 
 ```bash
 curl -s "https://sonarcloud.io/api/issues/search?organization=nick-tune-org&projectKeys=NTCoding_living-architecture&pullRequest=$(gh pr view --json number -q .number)&severities=CRITICAL,BLOCKER,MAJOR" | jq '.issues[] | {rule: .rule, message: .message, file: .component, line: .line}'
@@ -210,7 +243,7 @@ curl -s "https://sonarcloud.io/api/hotspots/search?organization=nick-tune-org&pr
 
 Fix all reported issues. For false positives, ask the user.
 
-#### Commit and re-check
+#### Step 4: Commit and re-check
 
 After addressing feedback:
 
@@ -220,7 +253,7 @@ sleep 5  # Wait for CI to pick up new commit
 gh pr checks --watch --fail-fast -i 30
 ```
 
-Repeat the feedback cycle (CodeRabbit → SonarCloud → commit) until all checks pass with no new comments.
+Repeat Steps 1-4 until all checks pass with no new comments.
 
 ---
 

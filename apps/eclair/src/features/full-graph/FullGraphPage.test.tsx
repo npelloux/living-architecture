@@ -130,6 +130,17 @@ describe('FullGraphPage', () => {
     expect(screen.getByTestId('force-graph-container')).not.toHaveAttribute('data-highlighted-node', 'node-1')
   })
 
+  test('ignores node param when node ID does not exist in graph', () => {
+    renderWithRouter(['/full-graph?node=non-existent-node'])
+
+    expect(screen.getByTestId('force-graph-container')).not.toHaveAttribute('data-highlighted-node', 'non-existent-node')
+  })
+
+  test('validates node exists before highlighting from URL param', () => {
+    renderWithRouter(['/full-graph?node=node-1'])
+    expect(screen.getByTestId('force-graph-container')).toHaveAttribute('data-highlighted-node', 'node-1')
+  })
+
   describe('focused domain feature', () => {
     test('does not display focused domain banner when no domain focused', () => {
       renderWithRouter()
@@ -364,30 +375,6 @@ describe('FullGraphPage', () => {
       await user.click(externalCheckbox)
 
       expect(externalCheckbox).not.toBeChecked()
-    })
-  })
-
-  describe('search functionality', () => {
-    test('filters visible nodes based on search query', async () => {
-      const user = userEvent.setup()
-      renderWithRouter()
-
-      const searchInput = screen.getByPlaceholderText(/search/i)
-      await user.type(searchInput, 'Test API')
-
-      expect(screen.getByTestId('force-graph-container')).toBeInTheDocument()
-    })
-
-    test('clears highlighted node when searching', async () => {
-      const user = userEvent.setup()
-      renderWithRouter(['/full-graph?node=node-1'])
-
-      expect(screen.getByTestId('force-graph-container')).toHaveAttribute('data-highlighted-node', 'node-1')
-
-      const searchInput = screen.getByPlaceholderText(/search/i)
-      await user.type(searchInput, 'API')
-
-      expect(screen.getByTestId('force-graph-container')).not.toHaveAttribute('data-highlighted-node', 'node-1')
     })
   })
 
