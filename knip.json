@@ -1,0 +1,47 @@
+{
+  "$schema": "https://knip.dev/reference/knip-json",
+  "ignoreDependencies": [
+    "tailwindcss"
+  ],
+  "workspaces": {
+    "apps/eclair": {
+      "entry": [
+        "src/main.tsx"
+      ],
+      "project": [
+        "src/**/*.ts",
+        "src/**/*.tsx"
+      ]
+    },
+    "apps/docs": {
+      "entry": [
+        ".vitepress/config.ts"
+      ],
+      "project": [
+        ".vitepress/**/*.ts",
+        ".vitepress/**/*.vue"
+      ]
+    },
+    "packages/riviere-cli": {
+      "entry": [
+        "src/bin.ts",
+        "src/index.ts"
+      ],
+      "project": [
+        "src/**/*.ts"
+      ]
+    },
+    "packages/*": {
+      "project": [
+        "src/**/*.ts"
+      ]
+    }
+  },
+  "ignore": [
+    "**/node_modules/**",
+    "**/*.d.ts",
+    "**/dist/**",
+    "**/.vitepress/dist/**",
+    "**/coverage/**"
+  ]
+}

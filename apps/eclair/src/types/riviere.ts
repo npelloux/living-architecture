@@ -10,22 +10,19 @@ export const domainNameSchema = z.string().min(1).brand<'DomainName'>()
 export type DomainName = z.infer<typeof domainNameSchema>
 
 export const entityNameSchema = z.string().min(1).brand<'EntityName'>()
-export type EntityName = z.infer<typeof entityNameSchema>
+type EntityName = z.infer<typeof entityNameSchema>
 
 export const moduleNameSchema = z.string().min(1).brand<'ModuleName'>()
-export type ModuleName = z.infer<typeof moduleNameSchema>
+type ModuleName = z.infer<typeof moduleNameSchema>
 
 export const parameterTypeSchema = z.string().min(1).brand<'ParameterType'>()
-export type ParameterType = z.infer<typeof parameterTypeSchema>
-
-export const entityFieldTypeSchema = z.string().min(1).brand<'EntityFieldType'>()
-export type EntityFieldType = z.infer<typeof entityFieldTypeSchema>
+type ParameterType = z.infer<typeof parameterTypeSchema>
 
 export const returnTypeSchema = z.string().min(1).brand<'ReturnType'>()
 export type ReturnType = z.infer<typeof returnTypeSchema>
 
 export const eventNameSchema = z.string().min(1).brand<'EventName'>()
-export type EventName = z.infer<typeof eventNameSchema>
+type EventName = z.infer<typeof eventNameSchema>
 
 export const graphNameSchema = z.string().min(1).brand<'GraphName'>()
 export type GraphName = z.infer<typeof graphNameSchema>
@@ -34,10 +31,7 @@ export const operationNameSchema = z.string().min(1).brand<'OperationName'>()
 export type OperationName = z.infer<typeof operationNameSchema>
 
 export const stateNameSchema = z.string().min(1).brand<'StateName'>()
-export type StateName = z.infer<typeof stateNameSchema>
-
-export const invariantSchema = z.string().min(1).brand<'Invariant'>()
-export type Invariant = z.infer<typeof invariantSchema>
+type StateName = z.infer<typeof stateNameSchema>
 
 export const entryPointSchema = z.string().min(1).brand<'EntryPoint'>()
 export type EntryPoint = z.infer<typeof entryPointSchema>
@@ -79,21 +73,10 @@ export interface OperationBehavior {
   emits?: string[]
 }
 
-export interface StateTransition {
+interface StateTransition {
   from: StateName
   to: StateName
   trigger?: string
-}
-
-export interface EntityField {
-  name: string
-  type: EntityFieldType
-  required?: boolean
-  description?: string
-}
-
-export interface EntityDataShape {
-  fields?: EntityField[]
 }
 
 export interface DomainMetadata {
@@ -118,7 +101,7 @@ interface BaseNode {
   metadata?: Record<string, unknown>
 }
 
-export interface UINode extends BaseNode {
+interface UINode extends BaseNode {
   type: 'UI'
   route: string
 }
@@ -131,11 +114,11 @@ export interface APINode extends BaseNode {
   operationName?: string
 }
 
-export interface UseCaseNode extends BaseNode {
+interface UseCaseNode extends BaseNode {
   type: 'UseCase'
 }
 
-export interface DomainOpNode extends BaseNode {
+interface DomainOpNode extends BaseNode {
   type: 'DomainOp'
   operationName: string
   entity?: EntityName
@@ -144,18 +127,18 @@ export interface DomainOpNode extends BaseNode {
   stateChanges?: StateTransition[]
 }
 
-export interface EventNode extends BaseNode {
+interface EventNode extends BaseNode {
   type: 'Event'
   eventName: EventName
   eventSchema?: string
 }
 
-export interface EventHandlerNode extends BaseNode {
+interface EventHandlerNode extends BaseNode {
   type: 'EventHandler'
   subscribedEvents: EventName[]
 }
 
-export interface CustomNode extends BaseNode {
+interface CustomNode extends BaseNode {
   type: 'Custom'
   customTypeName: string
 }
