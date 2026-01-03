@@ -82,21 +82,11 @@ Wait for user confirmation before proceeding.
 
 After user confirms:
 
-```bash
-# Pull latest from main
-git checkout main && git pull origin main
-
-# Create feature branch FIRST
-git checkout -b issue-<number>-short-description
-
-# Assign the issue
-gh issue edit <number> --add-assignee @me
-
-# Read issue details
-gh issue view <number>
+```text
+/start-task <issue-number>
 ```
 
-Read the issue body and related files (PRD, referenced code) before starting.
+Read the returned issue details and related files (PRD, referenced code) before starting.
 
 ---
 
@@ -157,7 +147,7 @@ If any fail, fix and re-run before proceeding.
 
 Run the task-check agent:
 
-```
+```text
 Use the Task tool with subagent_type "task-check:task-check". Provide:
 1. Task ID: GitHub issue number
 2. Task location: `gh issue view <number>`
@@ -179,27 +169,22 @@ Use the Task tool with subagent_type "task-check:task-check". Provide:
 
 ### Create PR
 
+Commit and push your changes, then run:
+
 ```bash
-# Commit
 git add -A && git commit -m "feat(scope): description"
-
-# Push
 git push -u origin HEAD
-
-# Create PR (auto-closes issue when merged)
-gh pr create --title "feat(scope): description" --body "Closes #<number>"
-
-# Wait for CI checks (REQUIRED - do not skip)
-gh pr checks --watch --fail-fast -i 30
 ```
 
-**You MUST run `gh pr checks --watch`** — this blocks until all CI checks complete.
+```text
+/submit-pr --title "feat(scope): description" --body "## Summary\n- Change 1\n- Change 2"
+```
 
-🚫 **NEVER** use `sleep && gh pr checks` patterns. The `--watch` flag handles waiting.
+The sub-agent will create the PR, watch all CI checks, and return results.
 
-**When checks pass:** Proceed to [Address PR feedback](#address-pr-feedback) — CodeRabbit comments may exist even when checks pass.
+**When checks pass:** Proceed to [Notify user](#notify-user).
 
-**When checks fail:** Proceed to [Address PR feedback](#address-pr-feedback) — the PR comments contain what failed.
+**When checks fail or issues found:** Proceed to [Address PR feedback](#address-pr-feedback).
 
 ---
 
@@ -248,9 +233,12 @@ Fix all reported issues. For false positives, ask the user.
 After addressing feedback:
 
 ```bash
-git add -A && git commit -m "fix: address PR feedback" && git push
-sleep 5  # Wait for CI to pick up new commit
-gh pr checks --watch --fail-fast -i 30
+git add -A && git commit -m "fix: address PR feedback"
+git push
+```
+
+```text
+/submit-pr --update
 ```
 
 Repeat Steps 1-4 until all checks pass with no new comments.
