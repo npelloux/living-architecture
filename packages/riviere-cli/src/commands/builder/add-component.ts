@@ -41,6 +41,7 @@ interface AddComponentOptions {
   operationName?: string;
   entity?: string;
   eventName?: string;
+  eventSchema?: string;
   subscribedEvents?: string;
   customType?: string;
   customProperty?: string[];
@@ -121,7 +122,11 @@ function addEventComponent(builder: RiviereBuilder, common: CommonInput, options
   if (!options.eventName) {
     throw new Error('--event-name is required for Event component');
   }
-  const component = builder.addEvent({ ...common, eventName: options.eventName });
+  const component = builder.addEvent({
+    ...common,
+    eventName: options.eventName,
+    ...(options.eventSchema !== undefined && { eventSchema: options.eventSchema }),
+  });
   return component.id;
 }
 
@@ -139,9 +144,9 @@ function addEventHandlerComponent(builder: RiviereBuilder, common: CommonInput, 
   return component.id;
 }
 
-type ComponentHandler = (builder: RiviereBuilder, common: CommonInput, options: AddComponentOptions) => string;
+type ComponentAdder = (builder: RiviereBuilder, common: CommonInput, options: AddComponentOptions) => string;
 
-const componentHandlers: Record<ComponentTypeFlag, ComponentHandler> = {
+const componentAdders: Record<ComponentTypeFlag, ComponentAdder> = {
   UI: addUIComponent,
   API: addAPIComponent,
   UseCase: addUseCaseComponent,
@@ -173,8 +178,8 @@ function addComponentToBuilder(
     ...(options.description ? { description: options.description } : {}),
   };
 
-  const handler = componentHandlers[componentType];
-  return handler(builder, commonInput, options);
+  const adder = componentAdders[componentType];
+  return adder(builder, commonInput, options);
 }
 
 function tryAddComponent(
@@ -240,7 +245,8 @@ Examples:
   # Add an Event
   $ riviere builder add-component --type Event --name "order-placed" \\
       --domain orders --module events --repository ecommerce \\
-      --file-path src/events/OrderPlaced.ts --event-name "order-placed"
+      --file-path src/events/OrderPlaced.ts --event-name "order-placed" \\
+      --event-schema "{ orderId: string, total: number }"
 `
     )
     .requiredOption('--type <type>', 'Component type (UI, API, UseCase, DomainOp, Event, EventHandler, Custom)')
@@ -256,6 +262,7 @@ Examples:
     .option('--operation-name <name>', 'Operation name (DomainOp)')
     .option('--entity <entity>', 'Entity name (DomainOp)')
     .option('--event-name <name>', 'Event name')
+    .option('--event-schema <schema>', 'Event schema definition')
     .option('--subscribed-events <events>', 'Comma-separated subscribed event names')
     .option('--custom-type <name>', 'Custom type name')
     .option('--custom-property <key:value>', 'Custom property (repeatable)', (val, acc: string[]) => [...acc, val], [])
