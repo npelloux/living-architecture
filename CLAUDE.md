@@ -18,6 +18,7 @@ Current packages:
 - `@living-architecture/riviere-schema` - Riviere schema definitions
 - `@living-architecture/riviere-extract-config` - JSON Schema and validation for extraction config DSL
 - `@living-architecture/riviere-extract-conventions` - Decorators for marking architectural components
+- `@living-architecture/riviere-extract-ts` - TypeScript component extractor using ts-morph for AST parsing
 
 Apps:
 - `living-architecture/eclair` - Web app for viewing your software architecture via Riviere a schema
@@ -43,46 +44,46 @@ Always use nx commands for build, test, lint. Don't try to run directly e.g. `pn
 
 ```bash
 # All projects
-nx run-many -t build
-nx run-many -t test
-nx run-many -t lint
+pnpm nx run-many -t build
+pnpm nx run-many -t test
+pnpm nx run-many -t lint
 
 # Specific project
-nx build [project-name]
-nx test [project-name]
-nx lint [project-name]
+pnpm nx build [project-name]
+pnpm nx test [project-name]
+pnpm nx lint [project-name]
 
 # Affected only (CI optimization)
-nx affected -t build
-nx affected -t test
+pnpm nx affected -t build
+pnpm nx affected -t test
 ```
 
 ### Single Test File
 
 ```bash
-nx test [project-name] -- --testNamePattern "should validate"
+pnpm nx test [project-name] -- --testNamePattern "should validate"
 ```
 
 ### Verify (Full Gate)
 
 ```bash
-nx run-many -t lint,typecheck,test --coverage
+pnpm nx run-many -t lint,typecheck,test --coverage
 ```
 
 ### Dependency Graph
 
 ```bash
-nx graph
+pnpm nx graph
 ```
 
 ### Adding New Projects
 
 ```bash
 # Add backend application
-nx g @nx/node:application apps/[app-name]
+pnpm nx g @nx/node:application apps/[app-name]
 
 # Add shared library (publishable)
-nx g @nx/js:library packages/[pkg-name] --publishable --importPath=@living-architecture/[pkg-name]
+pnpm nx g @nx/js:library packages/[pkg-name] --publishable --importPath=@living-architecture/[pkg-name]
 ```
 
 After generating a new project:
@@ -90,7 +91,7 @@ After generating a new project:
 2. Create the 3-file tsconfig structure (tsconfig.json, tsconfig.lib.json, tsconfig.spec.json)
 3. Add vitest.config.ts if tests are needed with 100% coverage as the default
 4. If importing from another project, add `"@living-architecture/[pkg-name]": "workspace:*"` to dependencies
-5. Run `nx sync` to update TypeScript project references
+5. Run `pnpm nx sync` to update TypeScript project references
 6. Update this CLAUDE.md "Current packages" section
 
 ## Task Workflow
@@ -140,14 +141,18 @@ Installed from `ntcoding/claude-skillz`:
 
 ## NX Guidelines
 
-- **Use generators** - Don't manually create project folders. Use `nx g @nx/js:library` or `nx g @nx/node:application`.
-- **Run `nx sync`** - After modifying tsconfig references or adding dependencies between projects.
-- **Debugging stale cache** - If something seems stale, run `nx reset` to clear the cache.
+- **Use generators** - Don't manually create project folders. Use `pnpm nx g @nx/js:library` or `pnpm nx g @nx/node:application`.
+- **Run `pnpm nx sync`** - After modifying tsconfig references or adding dependencies between projects.
+- **Debugging stale cache** - If something seems stale, run `pnpm nx reset` to clear the cache.
 
 ## General Guidelines
 
 - **Process before fix** - When you encounter a problem, improve the process/tooling first, then apply the fix. This ensures the same issue won't recur and benefits future work. Never just fix the symptom without addressing the root cause.
-- **Fail fast** - If a command fails or something doesn't work, STOP and discuss with the user. Do not improvise or try workarounds. Fix the underlying issue (or update the skill/docs) so it doesn't happen again.
+- **Use scripts, not gh/git directly** - Always use scripts in `./scripts/` for git and GitHub operations (PRs, issues, tasks). Do not use `gh` or `git` commands directly unless no script exists. If you need functionality that doesn't have a script, propose creating one rather than using raw commands.
+- **Command failures vs code quality issues**:
+  - **Command failures** (script doesn't exist, tool errors, missing dependencies) → STOP and consult with user
+  - **Code quality issues** (lint errors, unused dependencies, test failures, knip warnings) → fix them directly
+  - When in doubt, use judgment: obvious fixes → proceed; non-obvious → ask
 - **Do not modify root configuration files** (eslint.config.mjs, tsconfig.base.json, nx.json, vite.config, vitest.config.mts). If you believe a change is genuinely necessary, provide the suggested changes and ask the user.
 - **Do not use `--no-verify`, `--force`, or `--hard` flags.** These are blocked by hooks and will fail. All commits must pass the `verify` gate.
 - **Use NX commands** for all build, test, and lint operations. Do not run npm/pnpm directly in project folders.
